@@ -214,3 +214,11 @@ add('Review','review','Chapter synthesis: pick the right tool','CSP solving comb
 ['Search if necessary','Try an assignment, propagate again, and undo on contradiction.',[['Red'],['Green'],['Blue']],['C']],
 ['Consider alternatives','For big problems, compare min-conflicts local search and graph-structure approaches.',[['Red'],['Green'],['Blue']],['A','B','C']]
 ],Q('What is a strong general CSP workflow?','Ignore constraints until the end','Model → propagate → select/order → search → learn','Randomly discard domain values',1,'Inference and guided search work together.'),'Use the lesson list as a review checklist and student presentation outline.','Return to the original map-coloring problem and ask students to narrate each solver choice.');
+// Masterclass v3: add novice scaffolding to every subsection.
+// These are pedagogical pause points, not fabricated algorithm operations.
+for (const lesson of L) {
+ const first=lesson.stages[0],last=lesson.stages[lesson.stages.length-1];
+ lesson.stages.unshift({head:'Before we begin: what are we trying to learn?',text:`${lesson.intro} First, name each variable shown below: ${lesson.vars.join(', ')}. A domain contains candidates; it is not necessarily an assigned answer. Observe the initial diagram before advancing.`,domains:first.domains.map(a=>[...a]),focus:[],edges:first.edges});
+ lesson.stages.push({head:'Pause and explain the result in your own words',text:`Restate the rule behind ${lesson.title.toLowerCase()}. Which candidates were ruled out, and which constraints were responsible? The values below show the result of the worked example, not a new algorithm operation.`,domains:last.domains.map(a=>[...a]),focus:last.focus,edges:last.edges});
+ lesson.stages.push({head:'Transfer practice: think of another example',text:`Try this challenge: ${lesson.transfer} Revisit previous steps if you are unsure. For the quiz below, predict your answer before selecting an option.`,domains:last.domains.map(a=>[...a]),focus:[],edges:last.edges});
+}
