@@ -1,1 +1,858 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Interactive beginner-friendly animated lessons for Chapter 5 Constraint Satisfaction Problems, Monroe University CS650."><title>CS650 • Chapter 5 | Constraint Satisfaction Problems</title><link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/style.css"></head><body><header><div><h1>MONROE UNIVERSITY · CS650</h1><p>Chapter 5 · Constraint Satisfaction Problems · Animated Teaching Lab</p></div><button id="teacher" aria-pressed="false">Instructor notes: Off</button></header><div class="shell"><aside><h2>Chapter navigation</h2><div id="nav"></div></aside><main><section class="panel"><div class="toprow"><span class="eyebrow" id="sectionLabel">Chapter 5</span><span class="chip" id="completion">0 / 0 steps</span></div><h2 id="lessonTitle"></h2><p class="lead" id="intro"></p><div class="chips" id="meta"></div></section><section class="panel"><div class="toprow"><h3 class="subhead">Interactive, instructor-paced animation</h3><button id="reset">↺ Restart</button></div><div class="progress"><div id="progress"></div></div><div class="stepbar" id="stepbar"></div><div id="visualLab" class="visual-lab" aria-live="polite"></div><div id="scene" class="scene" aria-live="polite"></div><div id="changePanel" class="change-panel" aria-live="polite"></div><div id="learningLens" class="learning-lens"></div><div class="explain" aria-live="polite"><h3 id="stepTitle"></h3><p id="stepText"></p></div><div class="section-jump" aria-label="Navigate between sections and subsections"><button id="prevLesson">← Previous subsection</button><button id="sectionStart">↟ Section overview</button><button id="nextLesson">Next subsection →</button></div><div class="controls"><button id="prev">← Previous step</button><button class="primary" id="next">Next step →</button><button id="play" aria-pressed="false">▶ Auto-play</button><span id="count" class="counter"></span></div><div id="teacherNotes" class="teacher" hidden></div></section><section class="panel"><h3>Check your understanding</h3><p>Choose an answer; the explanation appears immediately. Try answering before advancing.</p><div class="check"><h3 id="question"></h3><div id="choices" class="choices"></div><div id="feedback" class="feedback" hidden></div></div><h3>Apply this idea in the real world</h3><p id="transfer"></p></section><section class="panel"><h3>Course learning objectives</h3><p>Define variables, domains, and constraints; distinguish inference from search; trace consistency algorithms; analyze heuristics and local search; and exploit graph structure to improve solving.</p><p><strong>Accessibility:</strong> animation is instructor-controlled, includes text narration, works with keyboard buttons, and supports reduced-motion preferences. No internet dependency after publication.</p><p><strong>Source:</strong> Original teaching explanations inspired by Russell & Norvig, <em>Artificial Intelligence: A Modern Approach</em>, 4th Global Edition, Chapter 5. The materials are newly authored, not reproductions of the textbook's figures or prose.</p></section></main></div><footer>CS650 · Monroe University · Chapter 5 Interactive Teaching Lab</footer><script src="assets/lessons.js"></script><script src="assets/visuals.js"></script><script src="assets/app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CS650 Chapter 5: Constraint Satisfaction Problems — interactive lab</title>
+<meta name="description" content="Step-by-step illustrated lessons on constraint satisfaction problems for CS650 at Monroe University.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400;1,7..72,600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F7F9FC;--card:#FFFFFF;--ink:#1B2B44;--muted:#5E6E85;--line:#A9B6C8;--grid:#E4EAF2;--soft:#EEF2F7;
+--r:#D1495B;--g:#2E8B57;--b:#3567C9;--focus:#C9821F;--focus-soft:#FBEBD3;--bad:#B3202F;--bad-soft:#FBE6E8;--ok:#1F7A5C;--ok-soft:#E1F2EA;--panel:#FFFFFF;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121C2B;--card:#1B2738;--ink:#E6EDF7;--muted:#9AA9BF;--line:#4A5B74;--grid:#1C2A3D;--soft:#22324A;
+--r:#E5677A;--g:#4DB383;--b:#6F96E8;--focus:#E8A33D;--focus-soft:#3B3020;--bad:#F07A86;--bad-soft:#3A2228;--ok:#5CC79C;--ok-soft:#1E3A30;--panel:#172235;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#121C2B;--card:#1B2738;--ink:#E6EDF7;--muted:#9AA9BF;--line:#4A5B74;--grid:#1C2A3D;--soft:#22324A;
+--r:#E5677A;--g:#4DB383;--b:#6F96E8;--focus:#E8A33D;--focus-soft:#3B3020;--bad:#F07A86;--bad-soft:#3A2228;--ok:#5CC79C;--ok-soft:#1E3A30;--panel:#172235;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Literata',Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6}
+button,select{font:inherit}
+.wrap{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100vh}
+nav{border-right:1px solid var(--line);padding:28px 18px 40px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;overflow-y:auto;background:var(--panel)}
+nav .course{font-size:.86rem;color:var(--muted);margin:0 0 2px}
+nav .chap{font-size:1.25rem;font-weight:700;line-height:1.25;margin:0 0 22px}
+nav h3{font-size:.95rem;font-weight:600;font-style:italic;color:var(--muted);margin:20px 0 6px}
+nav ol{list-style:none;margin:0;padding:0}
+nav a{display:grid;grid-template-columns:4.6em 1fr;gap:6px;padding:6px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.3}
+nav a .num{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.82rem;padding-top:1px}
+nav a:hover{background:var(--soft)}
+nav a[aria-current="true"]{background:var(--ink);color:var(--paper)}
+nav a[aria-current="true"] .num{color:var(--paper);opacity:.75}
+.navsel{display:none}
+main{padding:34px clamp(18px,4vw,56px) 60px;max-width:1040px;width:100%}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.sectnum{font-size:2.6rem;font-style:italic;font-weight:400;line-height:1;margin:0;color:var(--muted)}
+h1{font-size:clamp(1.55rem,3vw,2.15rem);line-height:1.15;margin:8px 0 10px;font-weight:700;letter-spacing:-.01em}
+.intro{max-width:68ch;margin:0 0 22px;color:var(--ink)}
+.toggle{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:.85rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.toggle[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+figure{margin:0;border:1.5px solid var(--ink);border-radius:14px;overflow:hidden;
+background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+figure svg{display:block;width:100%;height:auto;max-height:62vh}
+figure svg text{font-family:'Literata',Georgia,serif}
+figure svg text.mono,figure svg .mono text{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.caption{border-top:1.5px solid var(--ink);background:var(--card);padding:16px 22px 18px;min-height:5.4em;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.caption .count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem;padding-top:3px;white-space:nowrap}
+.caption p{margin:0;font-size:1.08rem;max-width:66ch}
+.controls{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+.btn{border:1.5px solid var(--ink);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 16px;font-size:.95rem;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px;flex-wrap:wrap;flex:1;justify-content:center;min-width:120px}
+.dots button{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;padding:0;cursor:pointer}
+.dots button[aria-current="true"]{background:var(--ink)}
+.dots button.seen{background:var(--line);border-color:var(--line)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.below{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;margin-top:34px}
+.below h2{font-size:1.05rem;margin:0 0 8px;font-weight:700}
+.quiz p.q{margin:0 0 10px}
+.quiz .opts{display:grid;gap:8px}
+.quiz button{text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 13px;cursor:pointer;font-size:.97rem}
+.quiz button.right{border-color:var(--ok);background:var(--ok-soft)}
+.quiz button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.quiz .why{margin:10px 0 0;font-size:.95rem;min-height:1.5em}
+.apply p{margin:0;font-size:.97rem}
+.note{margin-top:18px;border-left:4px solid var(--focus);background:var(--focus-soft);padding:10px 14px;border-radius:0 8px 8px 0;font-size:.95rem}
+.note[hidden]{display:none}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted);max-width:75ch}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:18px 18px 14px}
+nav ol,nav h3{display:none}.navsel{display:block;width:100%;padding:9px 10px;border:1.5px solid var(--ink);border-radius:8px;background:var(--card);color:var(--ink)}nav .chap{margin-bottom:12px}
+main{padding-top:22px}.below{grid-template-columns:1fr}.sectnum{font-size:2rem}figure svg{max-height:none}}
+@media (prefers-reduced-motion:no-preference){figure svg{animation:fade .25s ease-out}@keyframes fade{from{opacity:.55}to{opacity:1}}}
+@media print{nav,.controls,.toggle{display:none}.wrap{display:block}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav aria-label="Lessons">
+  <p class="course">CS650, Monroe University</p>
+  <p class="chap">Chapter 5: Constraint satisfaction problems</p>
+  <select class="navsel" id="navsel" aria-label="Choose a lesson"></select>
+  <div id="navlist"></div>
+</nav>
+<main>
+  <div class="head">
+    <div><p class="sectnum" id="sectnum"></p><h1 id="title"></h1></div>
+    <button class="toggle" id="notesBtn" aria-pressed="false">Instructor notes</button>
+  </div>
+  <p class="intro" id="intro"></p>
+  <figure>
+    <div id="fig"></div>
+    <div class="caption"><span class="count" id="count"></span><p id="cap" aria-live="polite"></p></div>
+  </figure>
+  <div class="controls">
+    <button class="btn" id="prev">Previous step</button>
+    <div class="dots" id="dots" role="group" aria-label="Steps"></div>
+    <button class="btn" id="play" aria-pressed="false">Play</button>
+    <button class="btn primary" id="next">Next step</button>
+  </div>
+  <p class="note" id="note" hidden></p>
+  <div class="below">
+    <section class="quiz" aria-labelledby="qh"><h2 id="qh">Check your understanding</h2><p class="q" id="q"></p><div class="opts" id="opts"></div><p class="why" id="why" aria-live="polite"></p></section>
+    <section class="apply" aria-labelledby="ah"><h2 id="ah">Where you will meet this</h2><p id="apply"></p></section>
+  </div>
+  <footer>Original illustrations and explanations for teaching, following the section numbering of Russell &amp; Norvig, <i>Artificial Intelligence: A Modern Approach</i>, 4th Global Edition, Chapter 5. Every algorithm trace on this page is computed by the page’s own code. Use the arrow keys to step through a lesson.</footer>
+</main>
+</div>
+<script>
+'use strict';
+/* ---------- palette (CSS variables so light/dark both work) ---------- */
+const K = { ink: 'var(--ink)', muted: 'var(--muted)', line: 'var(--line)', paper: 'var(--paper)', card: 'var(--card)',
+  R: 'var(--r)', G: 'var(--g)', B: 'var(--b)', focus: 'var(--focus)', bad: 'var(--bad)', ok: 'var(--ok)', soft: 'var(--soft)', badSoft: 'var(--bad-soft)', okSoft: 'var(--ok-soft)', focusSoft: 'var(--focus-soft)' };
+const COLOR = { R: K.R, G: K.G, B: K.B };
+const CNAME = { R: 'red', G: 'green', B: 'blue' };
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ---------- primitives: each returns an SVG string ---------- */
+function T(x, y, t, o = {}) {
+  const lines = String(t).split('\n'), lh = (o.size || 15) * 1.25;
+  return lines.map((s, k) => `<text x="${x}" y="${y + k * lh}" font-size="${o.size || 15}" fill="${o.color || K.ink}" text-anchor="${o.anchor || 'middle'}" font-weight="${o.weight || 500}"${o.italic ? ' font-style="italic"' : ''}${o.mono ? ' class="mono"' : ''}>${esc(s)}</text>`).join('');
+}
+function N(x, y, label, o = {}) {
+  const r = o.r || 24, fill = o.fill || K.card, dim = o.dim ? ' opacity="0.28"' : '';
+  const ring = o.ring ? `<circle cx="${x}" cy="${y}" r="${r + 6}" fill="none" stroke="${o.ring}" stroke-width="3.5"/>` : '';
+  const dark = [K.R, K.G, K.B, K.ink, K.bad, K.ok].includes(fill);
+  return `<g${dim}>${ring}<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${o.stroke || K.ink}" stroke-width="${o.sw || 1.8}"${o.dash ? ' stroke-dasharray="5 4"' : ''}/>` +
+    T(x, y + (o.fs || 14) * 0.36, label, { size: o.fs || 14, weight: 700, color: o.txt || (dark ? '#fff' : K.ink) }) + '</g>';
+}
+function E(a, b, o = {}) {
+  const r1 = o.r1 ?? 24, r2 = o.r2 ?? 24, dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, off = o.off || 0;
+  const x1 = a[0] + ux * r1 - uy * off, y1 = a[1] + uy * r1 + ux * off, x2 = b[0] - ux * (r2 + (o.arrow ? 4 : 0)) - uy * off, y2 = b[1] - uy * (r2 + (o.arrow ? 4 : 0)) + ux * off;
+  const col = o.color || K.line, w = o.w || 2.2;
+  let s = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"${o.dash ? ' stroke-dasharray="6 5"' : ''}${o.dim ? ' opacity="0.3"' : ''}/>`;
+  if (o.arrow) { const ax = x2 + ux * 4, ay = y2 + uy * 4, s1 = 11, s2 = 6; s += `<path d="M${ax},${ay} L${ax - ux * s1 - uy * s2},${ay - uy * s1 + ux * s2} L${ax - ux * s1 + uy * s2},${ay - uy * s1 - ux * s2}Z" fill="${col}"/>`; }
+  if (o.label) s += T((x1 + x2) / 2 - uy * 14, (y1 + y2) / 2 + ux * 14 + 4, o.label, { size: 12, color: o.lc || col, italic: true, weight: 600 });
+  return s;
+}
+function Badge(x, y, t, kind = 'plain', w) {
+  const st = { plain: [K.card, K.line, K.ink], new: [K.focusSoft, K.focus, K.ink], empty: [K.bad, K.bad, '#fff'], ok: [K.okSoft, K.ok, K.ink], gone: [K.badSoft, K.bad, K.bad] }[kind];
+  w = w || Math.max(34, 9 * String(t).length + 14);
+  return `<rect x="${x - w / 2}" y="${y}" width="${w}" height="22" rx="11" fill="${st[0]}" stroke="${st[1]}" stroke-width="1.4"/>` + T(x, y + 15.5, t, { size: 12.5, weight: 700, color: st[2] });
+}
+function Box(x, y, w, h, o = {}) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${o.rx ?? 8}" fill="${o.fill || K.card}" stroke="${o.stroke || K.line}" stroke-width="${o.sw || 1.4}"${o.dash ? ' stroke-dasharray="6 5"' : ''}${o.op ? ` opacity="${o.op}"` : ''}/>`; }
+function Mark(x, y, ok, size = 22) { return T(x, y + size * 0.35, ok ? '✓' : '✗', { size, weight: 800, color: ok ? K.ok : K.bad }); }
+function Dots(x, y, colors, r = 7) { return colors.split('').map((c, k) => `<circle cx="${x + k * (2 * r + 4) - (colors.length - 1) * (r + 2)}" cy="${y}" r="${r}" fill="${COLOR[c]}"/>`).join(''); }
+const svg = (inner, h = 420) => `<svg viewBox="0 0 720 ${h}" role="img" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+
+/* ---------- Australia: schematic map + constraint graph ---------- */
+const AU_N = { WA: ['NT', 'SA'], NT: ['WA', 'SA', 'Q'], SA: ['WA', 'NT', 'Q', 'NSW', 'V'], Q: ['NT', 'SA', 'NSW'], NSW: ['Q', 'SA', 'V'], V: ['SA', 'NSW'], T: [] };
+const AU_E = [['WA', 'NT'], ['WA', 'SA'], ['NT', 'SA'], ['NT', 'Q'], ['SA', 'Q'], ['SA', 'NSW'], ['SA', 'V'], ['Q', 'NSW'], ['NSW', 'V']];
+const AU_V = ['WA', 'NT', 'SA', 'Q', 'NSW', 'V', 'T'];
+const AU_POLY = {
+  WA: '0,52 96,30 96,232 52,250 6,236 0,140', NT: '96,30 132,18 172,22 172,124 96,124', SA: '96,124 192,124 192,252 162,236 132,256 96,232',
+  Q: '172,22 210,4 236,58 292,120 304,166 192,166 192,124 172,124', NSW: '192,166 304,166 290,222 254,242 192,220', V: '192,220 254,242 236,262 192,256', T: '220,282 250,280 246,306 226,308'
+};
+const AU_LBL = { WA: [48, 140], NT: [134, 78], SA: [146, 182], Q: [232, 110], NSW: [246, 198], V: [218, 243], T: [236, 297] };
+function auMap(ox, oy, colors = {}, o = {}) {
+  let s = `<g transform="translate(${ox},${oy})">`;
+  for (const v of AU_V) {
+    const f = colors[v] ? COLOR[colors[v]] : K.card, hl = o.hl && o.hl.includes(v);
+    s += `<polygon points="${AU_POLY[v]}" fill="${f}" fill-opacity="${colors[v] ? 0.85 : 1}" stroke="${hl ? K.focus : K.ink}" stroke-width="${hl ? 4 : 1.5}" stroke-linejoin="round"/>`;
+  }
+  for (const v of AU_V) s += T(AU_LBL[v][0], AU_LBL[v][1], v, { size: 13, weight: 700, color: colors[v] ? '#fff' : K.ink });
+  return s + '</g>';
+}
+const AU_G = { WA: [70, 205], NT: [175, 110], SA: [195, 225], Q: [300, 125], NSW: [325, 235], V: [260, 320], T: [345, 355] };
+/* o: colors{v:c}, doms{v:'RGB'|'∅'}, domKind{v:kind}, hot{'A-B':color}, faded[], ring{v:color}, dim[], arrows[[a,b,color,label]], dx,dy,sc */
+function auGraph(o = {}) {
+  const dx = o.dx || 0, dy = o.dy || 0, sc = o.sc || 1, P = {};
+  for (const v in AU_G) P[v] = [dx + AU_G[v][0] * sc, dy + AU_G[v][1] * sc];
+  let s = '';
+  for (const [a, b] of AU_E) {
+    const h = o.hot && (o.hot[a + '-' + b] || o.hot[b + '-' + a]);
+    const fd = o.faded && (o.faded.includes(a) || o.faded.includes(b));
+    s += E(P[a], P[b], h ? { color: h, w: 5 } : fd ? { dash: true, dim: true } : {});
+  }
+  for (const [a, b, c, lab] of (o.arrows || [])) s += E(P[a], P[b], { color: c, w: 3.5, arrow: true, off: -9, label: lab, r1: 26, r2: 26 });
+  for (const v of AU_V) {
+    const fd = o.faded && o.faded.includes(v);
+    s += N(P[v][0], P[v][1], v, { fill: o.colors && o.colors[v] ? COLOR[o.colors[v]] : K.card, ring: o.ring && o.ring[v], dash: fd, dim: fd || (o.dim && o.dim.includes(v)), fs: v.length > 2 ? 12 : 14 });
+    if (o.doms && o.doms[v] != null) { const d = o.doms[v]; s += Badge(P[v][0], P[v][1] + 30, d === '' ? '∅' : d, d === '' || d === '∅' ? 'empty' : (o.domKind && o.domKind[v]) || 'plain'); }
+  }
+  return { s, P };
+}
+
+/* ---------- solvers (traces are computed, never hand-typed) ---------- */
+const consistent = (a, v, c) => AU_N[v].every(n => a[n] !== c);
+function domsAfter(a) { // forward-checked domains for unassigned variables
+  const d = {};
+  for (const v of AU_V) d[v] = a[v] ? a[v] : 'RGB'.split('').filter(c => consistent(a, v, c)).join('');
+  return d;
+}
+/* plain chronological backtracking; returns grouped steps */
+function traceBacktrack(order, vals = 'RGB') {
+  const steps = [], a = {};
+  let backtracks = 0;
+  function rec(k) {
+    if (k === order.length) { steps.push({ kind: 'done', a: { ...a } }); return true; }
+    const v = order[k], tried = [];
+    for (const c of vals) {
+      const clash = AU_N[v].find(n => a[n] === c);
+      if (clash) { tried.push([c, clash]); continue; }
+      a[v] = c; steps.push({ kind: 'assign', v, c, tried: tried.slice(), a: { ...a } }); tried.length = 0;
+      if (rec(k + 1)) return true;
+      delete a[v];
+    }
+    backtracks++; steps.push({ kind: 'dead', v, tried: tried.slice(), a: { ...a }, n: backtracks });
+    return false;
+  }
+  rec(0); return { steps, backtracks };
+}
+/* AC-3 on a small binary CSP: vars, doms {v:[..]}, cons {'X,Y': (x,y)=>bool} */
+function traceAC3(vars, doms, cons) {
+  const D = {}; for (const v of vars) D[v] = doms[v].slice();
+  const q = Object.keys(cons).map(k => k.split(',')); const steps = [];
+  while (q.length) {
+    const [xi, xj] = q.shift(), f = cons[xi + ',' + xj], before = D[xi].slice();
+    D[xi] = D[xi].filter(x => D[xj].some(y => f(x, y)));
+    const removed = before.filter(x => !D[xi].includes(x)); const added = [];
+    if (removed.length) for (const k of Object.keys(cons)) { const [a, b] = k.split(','); if (b === xi && a !== xj && !q.some(e => e[0] === a && e[1] === b)) { q.push([a, b]); added.push([a, b]); } }
+    steps.push({ arc: [xi, xj], removed, D: JSON.parse(JSON.stringify(D)), q: q.map(e => e.slice()), added });
+    if (!D[xi].length) break;
+  }
+  return steps;
+}
+/* min-conflicts on n-queens, deterministic tie-breaking (lowest row) */
+function qConf(rows, c, r) { let n = 0; rows.forEach((rr, cc) => { if (cc !== c && (rr === r || Math.abs(rr - r) === Math.abs(cc - c))) n++; }); return n; }
+function traceMinConflicts(start, maxSteps = 12) {
+  let rows = start.slice(); const steps = [{ rows: rows.slice() }];
+  for (let s = 0; s < maxSteps; s++) {
+    const conflicted = rows.map((r, c) => [qConf(rows, c, r), c]).filter(x => x[0] > 0).map(x => x[1]);
+    if (!conflicted.length) break;
+    // prefer the first conflicted queen whose best row strictly reduces its conflicts; otherwise move sideways
+    let pick = null;
+    for (const c of conflicted) {
+      const counts = rows.map((_, r) => qConf(rows, c, r)), best = Math.min(...counts);
+      if (best < counts[rows[c]]) { pick = [c, counts, counts.indexOf(best)]; break; }
+    }
+    if (!pick) { const c = conflicted[0], counts = rows.map((_, r) => qConf(rows, c, r)); const best = Math.min(...counts.filter((_, r) => r !== rows[c])); pick = [c, counts, counts.findIndex((n, r) => n === best && r !== rows[c])]; }
+    const [c, counts, r] = pick;
+    steps.push({ rows: rows.slice(), col: c, counts }); rows[c] = r; steps.push({ rows: rows.slice(), col: c, moved: r });
+  }
+  return { steps, rows };
+}
+function qTotal(rows) { let n = 0; for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++) if (rows[i] === rows[j] || Math.abs(rows[i] - rows[j]) === j - i) n++; return n; }
+
+'use strict';
+const L1 = [];
+const SOL = { WA: 'R', NT: 'G', SA: 'B', Q: 'R', NSW: 'G', V: 'R', T: 'R' };
+function countColorings() { let n = 0; const vs = AU_V; const a = {}; (function r(k) { if (k === vs.length) { n++; return; } for (const c of 'RGB') if (consistent(a, vs[k], c)) { a[vs[k]] = c; r(k + 1); delete a[vs[k]]; } })(0); return n; }
+const prod = d => Object.values(d).reduce((p, s) => p * s.length, 1);
+const allRGB = () => Object.fromEntries(AU_V.map(v => [v, 'RGB']));
+
+/* ---- 5.1 ---- */
+L1.push({ id: '5.1', sec: '5.1 Defining CSPs', title: 'What is a constraint satisfaction problem?',
+  intro: 'A CSP is three things: variables, a domain of values for each, and constraints saying which combinations are allowed.',
+  steps: [
+    { c: 'Variables: one per region of Australia — WA, NT, SA, Q, NSW, V and T.', k: 0 },
+    { c: 'Domains: every region may be red, green or blue.', k: 1 },
+    { c: 'Constraints: regions that share a border must differ. Each border becomes an edge of the constraint graph.', k: 2 },
+    { c: 'A solution is complete (every variable has a value) and consistent (no edge joins equal colors).', k: 3 }],
+  draw: s => { const g = auGraph({ dx: 345, dy: 15, colors: s.k === 3 ? SOL : {}, doms: s.k === 1 || s.k === 2 ? allRGB() : null });
+    const graph = s.k >= 2 ? g.s : g.s.replace(/<line[^>]*\/>/g, '');
+    return svg(auMap(18, 70, s.k === 3 ? SOL : {}, { hl: s.k === 0 ? AU_V : [] }) + graph + T(170, 40, 'Map', { size: 14, color: K.muted, italic: true }) + T(540, 40, 'Constraint graph', { size: 14, color: K.muted, italic: true })); },
+  q: ['Which of these is a constraint in map coloring?', ['WA ∈ {red, green, blue}', 'WA ≠ NT', 'WA is a variable'], 1, 'Domains list allowed values; constraints restrict combinations — WA and NT share a border.'],
+  apply: 'Exam timetabling: courses are variables, time slots are domains, and "no student sits two exams at once" is a constraint.',
+  note: 'Ask students to name X, D and C aloud before revealing each step.' });
+
+L1.push({ id: '5.1-map', sec: '5.1 Defining CSPs', title: 'Map coloring: reading the constraint graph',
+  intro: 'The graph shows at a glance which variables interact — and which do not.',
+  steps: [
+    { c: 'SA touches five regions: the most constrained variable on the map.', hl: ['SA'] },
+    { c: 'Tasmania touches nothing. It is a separate component and can be colored on its own.', hl: ['T'] },
+    { c: () => `Raw combinations: 3⁷ = 2187. Only ${countColorings()} of them are solutions.`, hl: [] },
+    { c: 'Rename the colors in any solution and you get another: solutions come in families of six.', sol: true }],
+  draw: s => { const ring = {}; (s.hl || []).forEach(v => ring[v] = K.focus); const hot = {}; if ((s.hl || []).includes('SA')) AU_N.SA.forEach(n => hot['SA-' + n] = K.focus);
+    return svg(auMap(18, 70, s.sol ? SOL : {}, { hl: s.hl }) + auGraph({ dx: 345, dy: 15, ring, hot, colors: s.sol ? SOL : {} }).s); },
+  q: ['Why can Tasmania be colored independently?', ['It is an island in the map', 'It has no edges in the constraint graph', 'It has the largest domain'], 1, 'What matters is the graph: with no edges, no choice elsewhere can conflict with it.'],
+  apply: 'In a hospital roster, two wards that share no staff form separate components: solve them separately.',
+  note: 'Count the solutions live: 6 colorings of the mainland pattern × 3 for Tasmania = 18.' });
+
+/* job-shop: start times are variables */
+const JOBS = { AxleF: [10, 0], AxleB: [10, 1], WheelF: [1, 0], WheelB: [1, 1], NutsF: [2, 0], NutsB: [2, 1], Inspect: [3, 2] };
+const PREC = [['AxleF', 'WheelF'], ['WheelF', 'NutsF'], ['AxleB', 'WheelB'], ['WheelB', 'NutsB'], ['NutsF', 'Inspect'], ['NutsB', 'Inspect']];
+function schedule(sharedTool) {
+  const st = {};
+  const ready = j => Math.max(0, ...PREC.filter(p => p[1] === j).map(p => st[p[0]] + JOBS[p[0]][0]));
+  for (const j of ['AxleF', 'AxleB', 'WheelF', 'WheelB', 'NutsF', 'NutsB', 'Inspect']) {
+    st[j] = ready(j);
+    if (sharedTool && j === 'AxleB') st[j] = Math.max(st[j], st.AxleF + JOBS.AxleF[0]);
+    if (j === 'WheelB' || j === 'NutsB' || j === 'Inspect') st[j] = ready(j);
+  }
+  return st;
+}
+L1.push({ id: '5.1-scheduling', sec: '5.1 Defining CSPs', title: 'Job-shop scheduling',
+  intro: 'Assembling a car: each task’s start time is a variable, and the constraints are about order and shared equipment.',
+  steps: [
+    { c: 'Seven tasks, each with a duration in minutes. Each start time is an integer variable.', k: 0 },
+    { c: 'Precedence constraints: an axle goes on before its wheel, the wheel before its nuts, and both sets of nuts before inspection.', k: 1 },
+    { c: () => `Starting every task as early as precedence allows, the car is finished at minute ${(s => s.Inspect + 3)(schedule(false))}.`, k: 2 },
+    { c: 'But both axles need the same axle tool. Their bars overlap — a disjunctive constraint is violated.', k: 3 },
+    { c: () => `Disjunctive constraint: AxleF + 10 ≤ AxleB or AxleB + 10 ≤ AxleF. Moving AxleB after AxleF finishes the car at minute ${(s => s.Inspect + 3)(schedule(true))}.`, k: 4 }],
+  draw: s => {
+    const X0 = 140, W = 540, M = 30, x = t => X0 + t * W / M, lane = [110, 190, 270]; let o = '';
+    o += T(70, lane[0] + 6, 'Front', { size: 13, color: K.muted, anchor: 'end' }) + T(70, lane[1] + 6, 'Back', { size: 13, color: K.muted, anchor: 'end' }) + T(70, lane[2] + 6, 'Final', { size: 13, color: K.muted, anchor: 'end' });
+    if (s.k === 0) { let k = 0; for (const j in JOBS) { o += Box(90 + (k % 4) * 150, 90 + Math.floor(k / 4) * 110, 130, 54) + T(155 + (k % 4) * 150, 114 + Math.floor(k / 4) * 110, j, { size: 14, weight: 700 }) + T(155 + (k % 4) * 150, 134 + Math.floor(k / 4) * 110, JOBS[j][0] + ' min', { size: 12, color: K.muted }); k++; } return svg(o.replace(/<text x="70"[^]*?<\/text>/g, ''), 330); }
+    if (s.k === 1) { const P = { AxleF: [150, 110], WheelF: [330, 110], NutsF: [480, 110], AxleB: [150, 230], WheelB: [330, 230], NutsB: [480, 230], Inspect: [630, 170] };
+      for (const [a, b] of PREC) o += E(P[a], P[b], { arrow: true, color: K.ink, r1: 52, r2: 52 });
+      for (const j in P) o += Box(P[j][0] - 52, P[j][1] - 22, 104, 44, { fill: K.card, stroke: K.ink }) + T(P[j][0], P[j][1] + 5, j, { size: 13, weight: 700 });
+      return svg(o.replace(/<text x="70"[^]*?<\/text>/g, '') + T(390, 310, 'arrow  A → B  means  start(A) + duration(A) ≤ start(B)', { size: 13, color: K.muted, italic: true }), 330); }
+    const st = schedule(s.k === 4);
+    for (let t = 0; t <= M; t += 5) o += `<line x1="${x(t)}" y1="70" x2="${x(t)}" y2="300" stroke="${K.line}" stroke-width="1"/>` + T(x(t), 62, t, { size: 11, color: K.muted });
+    for (const j in JOBS) { const [d, ln] = JOBS[j], axle = j.startsWith('Axle'), clash = s.k === 3 && axle;
+      o += Box(x(st[j]), lane[ln] - 16 + (j === 'AxleB' && s.k === 3 ? 0 : 0), d * W / M, 32, { fill: clash ? K.badSoft : axle && s.k === 4 ? K.okSoft : K.focusSoft, stroke: clash ? K.bad : axle && s.k === 4 ? K.ok : K.focus, rx: 5 }) + (d < 3 ? T(x(st[j]) + d * W / M / 2, j.startsWith('Wheel') ? lane[ln] - 24 : lane[ln] + 34, j, { size: 11, weight: 700, color: K.muted }) : T(x(st[j]) + d * W / M / 2, lane[ln] + 5, j, { size: 13, weight: 700 })); }
+    const end = st.Inspect + 3; o += `<line x1="${x(end)}" y1="70" x2="${x(end)}" y2="300" stroke="${K.ink}" stroke-width="2.5" stroke-dasharray="6 4"/>` + T(x(end), 318, 'done at ' + end, { size: 13, weight: 700 });
+    if (s.k === 3) o += T(x(5), 150, 'same tool, same time ✗', { size: 13, weight: 700, color: K.bad });
+    return svg(o, 330); },
+  q: ['What kind of constraint says two tasks may not overlap on one machine?', ['Unary', 'Precedence', 'Disjunctive'], 2, 'It is an OR of two orderings: one of them must hold.'],
+  apply: 'Operating-room scheduling: surgeries needing the same surgeon or room are disjunctive constraints.',
+  note: 'Point out the domain here is integers 0…30 — far larger than three colors, which is why bounds reasoning appears later.' });
+
+/* cryptarithm hypergraph geometry */
+const CR_L = { F: [80, 120], T: [175, 120], U: [270, 120], W: [365, 120], R: [460, 120], O: [555, 120] };
+const CR_C = { C3: [160, 330], C2: [320, 330], C1: [480, 330] };
+const CR_S = [['c1', [520, 230], ['O', 'R', 'C1'], '+'], ['c2', [385, 230], ['W', 'U', 'C1', 'C2'], '+'], ['c3', [235, 230], ['T', 'O', 'C2', 'C3'], '+'], ['c4', [95, 230], ['C3', 'F'], '=']];
+const CR_V = { T: 7, W: 3, O: 4, F: 1, U: 6, R: 8, C1: 0, C2: 0, C3: 1 };
+function crypt(k, vals, okN) {
+  const P = { ...CR_L, ...CR_C }; let o = '';
+  if (k >= 1) for (const v in CR_L) o += E([317, 40], CR_L[v], { r1: 14, r2: 22, color: okN >= 5 ? K.ok : K.line, w: okN >= 5 ? 3 : 1.8 });
+  CR_S.slice(0, k >= 2 ? (k >= 3 ? 4 : 2) : 0).forEach(([n, p, vs], i) => vs.forEach(v => { o += E(p, P[v], { r1: 18, r2: 22, color: okN >= 4 ? K.ok : K.line, w: okN >= 4 ? 3 : 1.8 }); }));
+  if (k >= 1) o += Box(262, 22, 110, 34, { fill: okN >= 5 ? K.okSoft : K.card, stroke: K.ink, rx: 4 }) + T(317, 44, 'AllDiff', { size: 13, weight: 700 });
+  CR_S.slice(0, k >= 2 ? (k >= 3 ? 4 : 2) : 0).forEach(([n, p, vs, sym], i) => { o += Box(p[0] - 18, p[1] - 18, 36, 36, { fill: okN >= 4 ? K.okSoft : K.soft, stroke: K.ink, rx: 3 }) + T(p[0], p[1] + 6, sym, { size: 17, weight: 700 }); });
+  for (const v in CR_L) o += N(CR_L[v][0], CR_L[v][1], vals ? v + '=' + CR_V[v] : v, { r: 25, fs: vals ? 13 : 15, fill: vals ? K.ink : K.card });
+  for (const v in CR_C) o += N(CR_C[v][0], CR_C[v][1], vals ? v + '=' + CR_V[v] : v, { r: 25, fs: 12, fill: K.soft, dash: !vals });
+  o += `<g class="mono">` + T(650, 220, '  T W O', { size: 16, anchor: 'end', weight: 700 }) + T(650, 244, '+ T W O', { size: 16, anchor: 'end', weight: 700 }) + `<line x1="585" y1="252" x2="652" y2="252" stroke="${K.ink}" stroke-width="1.5"/>` + T(650, 274, 'F O U R', { size: 16, anchor: 'end', weight: 700 }) + '</g>';
+  if (vals) o += T(650, 300, '734 + 734 = 1468', { size: 12, anchor: 'end', color: K.muted });
+  return svg(o, 380);
+}
+L1.push({ id: '5.1-variations', sec: '5.1 Defining CSPs', title: 'Constraint types and the constraint hypergraph',
+  intro: 'Constraints can involve one variable, two, or many. Cryptarithms need the many-variable kind.',
+  steps: [
+    { c: 'TWO + TWO = FOUR: six letters, each a different digit. Gray circles are the carries between columns.', k: 0 },
+    { c: 'A global constraint, AllDiff, ties all six letters at once. It is drawn as a square joined to every variable it involves.', k: 1 },
+    { c: 'Column constraints: O + O = R + 10·C1 and C1 + W + W = U + 10·C2. Each square touches three or four variables.', k: 2 },
+    { c: 'C2 + T + T = O + 10·C3, and C3 = F. O is shared by two columns — that is how the columns influence each other.', k: 3 },
+    { c: 'Test 734 + 734 = 1468. Each column square checks out, and the six letters are all different digits.', k: 3, v: true, ok: 5 }],
+  draw: s => crypt(s.k, s.v, s.ok || 0),
+  q: ['How many variables does the tens-column constraint involve?', ['Two', 'Three', 'Four'], 2, 'C1, W, U and C2 — a higher-order constraint, not a binary one.'],
+  apply: 'Spreadsheet audits: a total cell constrains every cell it sums — a global constraint, like AllDiff.',
+  note: 'Unary constraints (one variable) and preferences (soft constraints with costs) are the other variations — mention them here.' });
+
+/* ---- 5.2 ---- */
+L1.push({ id: '5.2', sec: '5.2 Constraint propagation', title: 'Inference: shrinking domains before guessing',
+  intro: 'Every value removed by reasoning is a branch search never has to explore.',
+  steps: [
+    { c: () => `Before any choice: 3⁷ = ${prod(allRGB())} combinations to consider.`, a: {} },
+    { c: () => `Set WA = red and remove red from its neighbors: ${prod(domsAfter({ WA: 'R' }))} combinations remain.`, a: { WA: 'R' } },
+    { c: () => `Set Q = green and propagate again: ${prod(domsAfter({ WA: 'R', Q: 'G' }))} combinations remain — from 2187, without a single wrong guess.`, a: { WA: 'R', Q: 'G' } }],
+  draw: s => { const d = domsAfter(s.a), kind = {}; for (const v in d) if (!s.a[v] && d[v].length < 3) kind[v] = 'new';
+    return svg(auGraph({ dx: 150, dy: 10, colors: s.a, doms: d, domKind: kind }).s); },
+  q: ['What does propagation do?', ['Guesses a value', 'Removes values that cannot be part of any solution', 'Reorders variables'], 1, 'Propagation is inference: it only deletes what the constraints already rule out.'],
+  apply: 'A calendar app greying out times when an attendee is busy is propagation.',
+  note: 'The badge under each node is its current domain; teal badges just shrank.' });
+
+L1.push({ id: '5.2.1', sec: '5.2 Constraint propagation', title: 'Node consistency',
+  intro: 'A variable is node-consistent when every value in its domain satisfies its own unary constraints.',
+  steps: [
+    { c: 'Two unary constraints: South Australians dislike green, and Tasmania must be red.', st: 0 },
+    { c: 'Delete green from SA and every color except red from T.', st: 1 },
+    { c: 'Now every value left is allowed by its own variable’s rules. One pass suffices — unary constraints never interact.', st: 2 }],
+  draw: s => { const d = allRGB(), kind = {}; if (s.st >= 1) { d.SA = 'RB'; d.T = 'R'; kind.SA = kind.T = 'new'; }
+    const g = auGraph({ dx: 150, dy: 10, doms: d, domKind: kind, ring: s.st === 0 ? { SA: K.focus, T: K.focus } : {} });
+    return svg(g.s + (s.st === 0 ? T(g.P.SA[0] - 70, g.P.SA[1] + 92, 'SA ≠ green', { size: 13, weight: 700, color: K.focus }) + T(g.P.T[0] + 58, g.P.T[1] + 6, 'T = red', { size: 13, weight: 700, color: K.focus }) : '')); },
+  q: ['Which constraint can node consistency remove values for?', ['SA ≠ green', 'SA ≠ NT', 'AllDiff(WA, NT, SA)'], 0, 'Only unary constraints — those on a single variable.'],
+  apply: 'A course that must be in a lab room: delete every non-lab room from its domain before scheduling.',
+  note: 'A cheap first step any solver should do.' });
+
+const XV = { X: 140, Y: 360 }, VY = v => 110 + (v - 1) * 95;
+function supportFig(st) {
+  let o = T(XV.X, 70, 'X', { size: 18, weight: 700 }) + T(XV.Y, 70, 'Y', { size: 18, weight: 700 });
+  if (st >= 1) for (const [a, b] of [[1, 2], [1, 3], [2, 3]]) o += E([XV.X, VY(a)], [XV.Y, VY(b)], { color: K.ok, w: 2.6, r1: 22, r2: 22 });
+  for (const v of [1, 2, 3]) {
+    const gx = st >= 1 && v === 3, gy = st >= 2 && v === 1;
+    o += N(XV.X, VY(v), String(v), { r: 22, fill: gx ? K.badSoft : K.card, stroke: gx ? K.bad : K.ink, txt: gx ? K.bad : null });
+    o += N(XV.Y, VY(v), String(v), { r: 22, fill: gy ? K.badSoft : K.card, stroke: gy ? K.bad : K.ink, txt: gy ? K.bad : null });
+    if (gx) o += T(XV.X - 40, VY(v) + 5, 'no support', { size: 12, anchor: 'end', italic: true, color: K.bad, weight: 600 });
+    if (gy) o += T(XV.Y + 40, VY(v) + 5, 'no support', { size: 12, anchor: 'start', italic: true, color: K.bad, weight: 600 });
+  }
+  o += T(250, 400, 'constraint  X < Y  ·  a line joins a pair that satisfies it', { size: 13, color: K.muted, italic: true });
+  const res = st >= 3 ? Badge(600, 150, 'X ∈ {1, 2}', 'ok', 150) + Badge(600, 190, 'Y ∈ {2, 3}', 'ok', 150) : '';
+  return svg(o + res);
+}
+L1.push({ id: '5.2.2', sec: '5.2 Constraint propagation', title: 'Arc consistency: every value needs a support',
+  intro: 'Arc X→Y is consistent when each value of X has at least one value of Y that satisfies the constraint — a support.',
+  steps: [
+    { c: 'Draw each value as its own node. X and Y both start with {1, 2, 3}.', st: 0 },
+    { c: 'Arc X→Y: X=1 and X=2 have lines; X=3 has none — no Y is larger. Delete it.', st: 1 },
+    { c: 'Arc Y→X is a separate check: Y=1 has no smaller X. Delete it.', st: 2 },
+    { c: 'Every surviving value has a line. Both arcs are now consistent.', st: 3 }],
+  draw: s => supportFig(s.st),
+  q: ['After making X→Y consistent, is Y→X automatically consistent?', ['Yes', 'No'], 1, 'Arcs are directed: Y=1 still lacked support until Y→X was checked.'],
+  apply: 'Before booking a connecting flight, delete arrival times with no departure after them.',
+  note: 'Have students find the deleted values before revealing each step.' });
+
+const AC = traceAC3(['X', 'Y', 'Z'], { X: [1, 2, 3], Y: [1, 2, 3], Z: [1, 2, 3] }, { 'X,Y': (x, y) => x < y, 'Y,X': (y, x) => x < y, 'Y,Z': (y, z) => y < z, 'Z,Y': (z, y) => y < z });
+const ACP = { X: [170, 150], Y: [360, 150], Z: [550, 150] };
+const fmt = a => '{' + a.join(',') + '}';
+L1.push({ id: '5.2.2-AC3', sec: '5.2 Constraint propagation', title: 'AC-3, one arc at a time',
+  intro: 'AC-3 keeps a queue of directed arcs. It revises one arc at a time and, when a domain shrinks, re-queues the arcs pointing into that variable.',
+  steps: [{ c: 'Constraints X < Y < Z, all domains {1, 2, 3}. The queue starts with every directed arc.', i: -1 }].concat(AC.map((st, i) => ({ i,
+    c: `Revise ${st.arc[0]}→${st.arc[1]}: remove ${st.removed.join(' and ')} from ${st.arc[0]}.` + (st.added.length ? ` ${st.arc[0]} changed, so ${st.added.map(e => '(' + e.join(',') + ')').join(' ')} rejoins the queue.` : '') }))).concat([{ i: 99, c: 'Queue empty. Every arc is consistent — and here each domain is a single value: X = 1, Y = 2, Z = 3.' }]),
+  draw: s => {
+    const st = s.i === -1 ? null : AC[Math.min(s.i, AC.length - 1)], prev = s.i <= 0 ? { X: [1, 2, 3], Y: [1, 2, 3], Z: [1, 2, 3] } : AC[Math.min(s.i, AC.length) - 1].D;
+    const D = st ? st.D : prev; let o = E(ACP.X, ACP.Y, { w: 2 }) + E(ACP.Y, ACP.Z, { w: 2 });
+    if (st && s.i < 99) o += E(ACP[st.arc[0]], ACP[st.arc[1]], { color: K.focus, w: 4, arrow: true, off: -16, r1: 26, r2: 26, label: 'revise ' + st.arc[0] });
+    if (st && s.i < 99) for (const [a, b] of st.added) o += E(ACP[a], ACP[b], { color: K.ok, w: 4, arrow: true, off: 16, r1: 26, r2: 26, label: 're-queued' });
+    for (const v of ['X', 'Y', 'Z']) { o += N(ACP[v][0], ACP[v][1], v, { r: 26, fs: 16 }); const changed = st && s.i < 99 && st.arc[0] === v && st.removed.length; o += Badge(ACP[v][0], ACP[v][1] + 36, fmt(D[v]), changed ? 'new' : s.i === 99 ? 'ok' : 'plain', 70); }
+    const q = st ? st.q : Object.keys({ 'X,Y': 1, 'Y,X': 1, 'Y,Z': 1, 'Z,Y': 1 }).map(k => k.split(','));
+    o += T(110, 290, 'queue', { size: 13, color: K.muted, anchor: 'end', italic: true });
+    q.forEach((e, k) => { const isNew = st && st.added.some(a => a[0] === e[0] && a[1] === e[1]); o += Box(125 + k * 92, 268, 84, 34, { fill: isNew ? K.okSoft : K.card, stroke: isNew ? K.ok : K.line }) + T(167 + k * 92, 290, '(' + e.join(',') + ')', { size: 14, weight: 700 }); });
+    if (!q.length) o += T(130, 290, 'empty', { size: 14, anchor: 'start', italic: true, color: K.muted });
+    return svg(o, 340); },
+  q: ['When Y’s domain shrinks while revising Y→Z, which arc is re-queued?', ['(Y,Z)', '(X,Y)', '(Z,Y)'], 1, 'Arcs pointing into Y, except the one just used: (X,Y) — and (Z,Y) is already waiting.'],
+  apply: 'Supply chains: when one supplier’s capacity drops, re-check every order that depends on that supplier.',
+  note: 'AC-3 returning true means no arc inconsistency — not, in general, that a solution exists.' });
+
+const TRI = { WA: [200, 120], NT: [440, 120], SA: [320, 300] };
+function tri(o2 = {}) {
+  let o = '';
+  for (const [a, b] of [['WA', 'NT'], ['NT', 'SA'], ['WA', 'SA']]) o += E(TRI[a], TRI[b], { color: o2.hot && o2.hot.includes(a + b) ? K.focus : K.line, w: o2.hot && o2.hot.includes(a + b) ? 4.5 : 2.2, r1: 28, r2: 28 });
+  for (const v in TRI) { o += N(TRI[v][0], TRI[v][1], v, { r: 28, fill: o2.col && o2.col[v] ? COLOR[o2.col[v]] : K.card, fs: 14 }); o += Badge(TRI[v][0], TRI[v][1] + 36, o2.dom && o2.dom[v] != null ? o2.dom[v] : '{R, B}', o2.dom && o2.dom[v] === '∅' ? 'empty' : 'plain', 70); }
+  return o;
+}
+L1.push({ id: '5.2.3', sec: '5.2 Constraint propagation', title: 'Path consistency',
+  intro: 'Path consistency checks a pair of variables against a third: every allowed pair must extend to that third variable.',
+  steps: [
+    { c: 'Color WA, NT and SA with only red and blue. Every arc is consistent: each value has a different neighbor value.', k: 0 },
+    { c: 'Check the pair WA = red, SA = blue against NT: NT can be neither. Delete the pair.', k: 1 },
+    { c: 'The pair WA = blue, SA = red fails the same way. No pair of WA and SA survives — the problem has no solution, which arc consistency could not see.', k: 2 }],
+  draw: s => { let o = tri({ hot: s.k ? ['WASA'] : [], col: s.k === 1 ? { WA: 'R', SA: 'B' } : s.k === 2 ? { WA: 'B', SA: 'R' } : {}, dom: s.k ? { NT: '∅' } : {} });
+    o += Box(520, 230, 180, 110, { fill: K.card }) + T(610, 255, 'pairs for (WA, SA)', { size: 13, color: K.muted, italic: true });
+    [['R', 'B'], ['B', 'R']].forEach(([a, b], k) => { const gone = s.k > k; o += T(610, 285 + k * 28, `WA=${CNAME[a]}, SA=${CNAME[b]}`, { size: 13, weight: 700, color: gone ? K.bad : K.ink }) + (gone ? `<line x1="535" y1="${281 + k * 28}" x2="685" y2="${281 + k * 28}" stroke="${K.bad}" stroke-width="2"/>` : ''); });
+    return svg(o); },
+  q: ['Why does arc consistency miss this contradiction?', ['It only looks at one constraint at a time', 'It ignores the domains', 'It needs integers'], 0, 'Every single edge is satisfiable on its own; the trouble only shows when three variables are considered together.'],
+  apply: 'Three meetings that pairwise fit in two rooms may still be impossible together.',
+  note: 'Link back to the AllDiff pigeonhole argument: three variables, two values.' });
+
+L1.push({ id: '5.2.4', sec: '5.2 Constraint propagation', title: 'k-consistency',
+  intro: 'k-consistency: any consistent assignment to k−1 variables can be extended to any k-th variable.',
+  steps: [
+    { c: '1-consistency is node consistency: no unary constraints here, so it holds.', k: 1 },
+    { c: '2-consistency is arc consistency: each value has a support along every edge. It holds.', k: 2 },
+    { c: '3-consistency is path consistency: no pair of WA and SA extends to NT. It fails.', k: 3 },
+    { c: 'If a CSP with n variables is strongly n-consistent, we can assign variables in any order and never backtrack — but enforcing it can cost exponential time.', k: 4 }],
+  draw: s => { let o = tri({ hot: s.k === 3 ? ['WASA'] : s.k === 2 ? ['WANT', 'NTSA', 'WASA'] : [], dom: s.k === 3 ? { NT: '∅' } : {} });
+    const rows = [['1', 'node', true], ['2', 'arc', true], ['3', 'path', false]];
+    rows.forEach(([k, n, ok], i) => { const shown = s.k > i || s.k === 4; o += Box(500, 100 + i * 62, 205, 48, { fill: shown ? (ok ? K.okSoft : K.badSoft) : K.card, stroke: shown ? (ok ? K.ok : K.bad) : K.line }) + T(522, 131 + i * 62, k, { size: 18, weight: 800 }) + T(542, 129 + i * 62, n + ' consistency', { size: 13, weight: 600, anchor: 'start' }) + (shown ? Mark(686, 124 + i * 62, ok, 18) : ''); });
+    return svg(o); },
+  q: ['What does strong n-consistency buy you?', ['Faster arc checks', 'A solution with no backtracking', 'Smaller domains only'], 1, 'Every partial assignment extends — so search never hits a dead end.'],
+  apply: 'Most practical solvers stop at arc consistency: higher levels cost more than they save.',
+  note: 'Strong k-consistent = j-consistent for every j ≤ k.' });
+
+const HV = { X: [140, 110], Y: [140, 210], Z: [140, 310] }, HN = { 1: [420, 110], 2: [420, 210], 3: [420, 310] };
+L1.push({ id: '5.2.5', sec: '5.2 Constraint propagation', title: 'Global constraints: AllDiff',
+  intro: 'AllDiff requires all its variables to take different values. Reasoning about the whole group finds more than pairwise checks.',
+  steps: [
+    { c: 'Variables on the left, values on the right; a line means “may take this value.” X and Y may be 1 or 2; Z may be 1, 2 or 3.', k: 0 },
+    { c: 'X and Y between them reach only two values. Two variables, two values: together they must use up 1 and 2.', k: 1 },
+    { c: 'So Z’s lines to 1 and 2 are cut. Z must be 3 — though each pair, checked alone, looked fine.', k: 2 },
+    { c: 'The same counting detects failure: if Z also had only {1, 2}, three variables would need three values from two.', k: 3 }],
+  draw: s => { let o = '';
+    const lines = [['X', 1], ['X', 2], ['Y', 1], ['Y', 2], ['Z', 1], ['Z', 2]].concat(s.k === 3 ? [] : [['Z', 3]]);
+    for (const [a, b] of lines) { const hot = s.k >= 1 && a !== 'Z', cut = s.k === 2 && a === 'Z' && b !== 3, z3 = s.k === 2 && a === 'Z' && b === 3, fail = s.k === 3;
+      o += E(HV[a], HN[b], { color: fail ? K.bad : hot ? K.focus : cut ? K.bad : z3 ? K.ok : K.line, w: hot || z3 ? 4 : 2, dash: cut, r1: 26, r2: 26 }); }
+    for (const v in HV) o += N(HV[v][0], HV[v][1], v, { r: 26, fs: 16 });
+    for (const v in HN) o += N(HN[v][0], HN[v][1], v, { r: 26, fs: 16, fill: K.soft, dim: s.k === 3 && v === '3' });
+    o += Box(510, 150, 190, 120, { fill: s.k === 3 ? K.badSoft : s.k === 2 ? K.okSoft : K.card, stroke: s.k === 3 ? K.bad : s.k === 2 ? K.ok : K.line }) + T(605, 185, 'AllDiff(X, Y, Z)', { size: 14, weight: 700 }) +
+      T(605, 225, s.k === 3 ? '3 variables, 2 values ✗' : s.k === 2 ? 'Z = 3' : s.k === 1 ? '{X, Y} use {1, 2}' : '', { size: 14, weight: 700, color: s.k === 3 ? K.bad : K.ink });
+    return svg(o); },
+  q: ['Why must Z be 3?', ['Z prefers 3', 'X and Y use up 1 and 2 between them', 'Arc consistency removed 1 and 2'], 1, 'Two variables confined to two values claim both — Hall’s argument. Pairwise arc consistency would not remove anything.'],
+  apply: 'Assigning three nurses to three shifts when two nurses can only work days: the third gets nights.',
+  note: 'This is why solvers implement AllDiff directly rather than as many ≠ constraints.' });
+
+L1.push({ id: '5.2.5-resources', sec: '5.2 Constraint propagation', title: 'Resource constraints: AtMost',
+  intro: 'AtMost(10, P1, P2, P3, P4): four teams draw on a pool of at most 10 people.',
+  steps: [
+    { c: 'Each team needs between 2 and 6 people.', k: 0 },
+    { c: 'The other three teams need at least 2 each — 6 people — so no team can have more than 10 − 6 = 4.', k: 1 },
+    { c: 'Delete 5 and 6 from every domain. The pool can still be shared: 2 + 2 + 2 + 4 = 10.', k: 2 },
+    { c: 'If each team instead needed at least 3, the minimums alone sum to 12 > 10. The constraint is inconsistent before any search.', k: 3 }],
+  draw: s => { const X0 = 150, u = 70; let o = '';
+    for (let t = 0; t <= 6; t++) o += `<line x1="${X0 + t * u}" y1="80" x2="${X0 + t * u}" y2="330" stroke="${K.line}" stroke-width="1"/>` + T(X0 + t * u, 70, t, { size: 12, color: K.muted });
+    ['P1', 'P2', 'P3', 'P4'].forEach((p, i) => { const y = 100 + i * 58, lo = s.k === 3 ? 3 : 2, hi = s.k >= 2 && s.k < 3 ? 4 : 6;
+      o += T(120, y + 21, p, { size: 15, weight: 700, anchor: 'end' });
+      if (s.k === 2) o += Box(X0 + 4 * u, y, 2 * u, 30, { fill: K.badSoft, stroke: K.bad, dash: true });
+      o += Box(X0 + lo * u, y, (hi - lo) * u, 30, { fill: s.k === 3 ? K.badSoft : s.k >= 1 ? K.focusSoft : K.card, stroke: s.k === 3 ? K.bad : K.ink }); });
+    if (s.k === 1) o += `<line x1="${X0 + 4 * u}" y1="88" x2="${X0 + 4 * u}" y2="335" stroke="${K.focus}" stroke-width="3"/>` + T(X0 + 4 * u, 352, 'upper bound 4', { size: 13, weight: 700, color: K.focus });
+    o += T(360, 395, s.k === 3 ? 'minimum total 3 + 3 + 3 + 3 = 12 > 10' : 'total of the four must be ≤ 10', { size: 14, weight: 700, color: s.k === 3 ? K.bad : K.muted });
+    return svg(o); },
+  q: ['With domains 2…6 and AtMost 10 over four teams, what is each team’s new maximum?', ['4', '6', '10'], 0, '10 minus the other three teams’ minimum of 2 each.'],
+  apply: 'Project budgets: one project’s maximum budget is the total minus everyone else’s minimum.',
+  note: 'Same reasoning as bounds propagation, applied to a sum.' });
+
+L1.push({ id: '5.2.5-bounds', sec: '5.2 Constraint propagation', title: 'Bounds propagation',
+  intro: 'For huge numeric domains, keep only the lowest and highest possible value — the bounds — and tighten them.',
+  steps: [
+    { c: 'Flight 1 holds 0–165 passengers, Flight 2 holds 0–385, and 420 must travel: F1 + F2 = 420.', k: 0 },
+    { c: 'Flight 2 takes at most 385, so Flight 1 needs at least 420 − 385 = 35.', k: 1 },
+    { c: 'Flight 1 takes at most 165, so Flight 2 needs at least 420 − 165 = 255. Both bounds are now tight.', k: 2 }],
+  draw: s => { const X0 = 120, W = 560, sc = W / 420; let o = T(X0, 82, '0', { size: 12, color: K.muted }) + T(X0 + W, 82, '420', { size: 12, color: K.muted });
+    const bar = (y, name, cap, lo) => T(95, y + 22, name, { size: 16, weight: 700, anchor: 'end' }) + Box(X0, y, W, 34, { fill: K.soft, stroke: K.line, rx: 4 }) + (lo ? Box(X0, y, lo * sc, 34, { fill: K.badSoft, stroke: K.bad, rx: 4, dash: true }) : '') + Box(X0 + lo * sc, y, (cap - lo) * sc, 34, { fill: lo ? K.focusSoft : K.card, stroke: K.ink, rx: 4 }) + T(X0 + lo * sc, y + 54, lo, { size: 13, weight: 700, color: lo ? K.bad : K.muted }) + T(X0 + cap * sc, y + 54, cap, { size: 13, weight: 700, color: K.muted });
+    o += bar(110, 'F1', 165, s.k >= 1 ? 35 : 0) + bar(220, 'F2', 385, s.k >= 2 ? 255 : 0);
+    o += T(400, 355, s.k === 0 ? 'F1 + F2 = 420' : s.k === 1 ? 'F1 ≥ 420 − 385 = 35' : 'F2 ≥ 420 − 165 = 255', { size: 17, weight: 700 });
+    return svg(o, 390); },
+  q: ['Why not list every possible passenger count?', ['Lists cannot hold numbers', 'Bounds are compact and tighten with simple arithmetic', 'Domains must be colors'], 1, 'Two numbers per variable replace hundreds of values.'],
+  apply: 'Logistics: truckload bounds tighten as orders are committed.',
+  note: 'Bounds consistency: every bound value has a supporting value in the other variable.' });
+
+/* Sudoku */
+const SG = [[0, 2, 0, 0], [3, 4, 0, 2], [0, 0, 4, 0], [0, 3, 0, 0]];
+function sudokuSolve() { const g = SG.map(r => r.slice()), order = []; const cand = (r, c) => [1, 2, 3, 4].filter(v => !g[r].includes(v) && !g.some(rr => rr[c] === v) && ![0, 1].some(i => [0, 1].some(j => g[(r & 2) + i][(c & 2) + j] === v)));
+  for (;;) { let f = null; for (let r = 0; r < 4 && !f; r++) for (let c = 0; c < 4 && !f; c++) if (!g[r][c] && cand(r, c).length === 1) f = [r, c, cand(r, c)[0]]; if (!f) break; g[f[0]][f[1]] = f[2]; order.push(f); } return { g, order }; }
+L1.push({ id: '5.2.6', sec: '5.2 Constraint propagation', title: 'Sudoku as a CSP',
+  intro: 'Each cell is a variable with domain 1–9; every row, column and box is an AllDiff constraint.',
+  steps: [
+    { c: '81 variables and 27 AllDiff constraints. The highlighted cell shares a constraint with 20 peers: its row, column and box.', k: 0 },
+    { c: 'A 4×4 version to propagate by hand: digits 1–4. Watch the top-left cell; its domain is {1, 2, 3, 4}.', k: 1 },
+    { c: 'Its row contains 2, its column contains 3, its box contains 4. Each removes a value.', k: 2 },
+    { c: 'Only 1 is left, so the cell is forced. Filling it removes 1 from its peers — and forces the next cell.', k: 3 },
+    { c: () => `Repeat: all ${sudokuSolve().order.length} empty cells are forced in turn (small numbers show the order). Solved by propagation alone — no search.`, k: 4 }],
+  draw: s => { let o = '';
+    if (s.k === 0) { const X = 190, Y = 40, c = 38, tr = 4, tc = 6;
+      for (let r = 0; r < 9; r++) for (let cc = 0; cc < 9; cc++) { const peer = r === tr || cc === tc || (Math.floor(r / 3) === Math.floor(tr / 3) && Math.floor(cc / 3) === Math.floor(tc / 3)); o += `<rect x="${X + cc * c}" y="${Y + r * c}" width="${c}" height="${c}" fill="${r === tr && cc === tc ? 'var(--focus)' : peer ? 'var(--focus-soft)' : 'var(--card)'}" stroke="${K.line}"/>`; }
+      for (let k = 0; k <= 9; k += 3) o += `<line x1="${X + k * c}" y1="${Y}" x2="${X + k * c}" y2="${Y + 9 * c}" stroke="${K.ink}" stroke-width="2.5"/><line x1="${X}" y1="${Y + k * c}" x2="${X + 9 * c}" y2="${Y + k * c}" stroke="${K.ink}" stroke-width="2.5"/>`;
+      return svg(o, 400); }
+    const X = 110, Y = 40, c = 82, sol = sudokuSolve(), filled = {};
+    if (s.k >= 3) filled['0,0'] = 1; if (s.k === 4) sol.order.forEach(([r, cc, v], i) => filled[r + ',' + cc] = [v, i + 1]);
+    for (let r = 0; r < 4; r++) for (let cc = 0; cc < 4; cc++) { const tgt = r === 0 && cc === 0 && s.k >= 1 && s.k < 4, hl = s.k === 2 && (r === 0 || cc === 0 || (r < 2 && cc < 2)) && !(r === 0 && cc === 0);
+      o += `<rect x="${X + cc * c}" y="${Y + r * c}" width="${c}" height="${c}" fill="${tgt ? 'var(--focus-soft)' : hl ? 'var(--soft)' : 'var(--card)'}" stroke="${K.line}"/>`;
+      const v = SG[r][cc], f = filled[r + ',' + cc];
+      if (v) o += T(X + cc * c + c / 2, Y + r * c + c / 2 + 12, v, { size: 34, weight: 700 });
+      else if (f) { const val = Array.isArray(f) ? f[0] : f; o += T(X + cc * c + c / 2, Y + r * c + c / 2 + 12, val, { size: 34, weight: 700, color: K.ok }); if (Array.isArray(f)) o += T(X + cc * c + 12, Y + r * c + 18, f[1], { size: 12, weight: 700, color: K.muted }); } }
+    for (let k = 0; k <= 4; k += 2) o += `<line x1="${X + k * c}" y1="${Y}" x2="${X + k * c}" y2="${Y + 4 * c}" stroke="${K.ink}" stroke-width="3"/><line x1="${X}" y1="${Y + k * c}" x2="${X + 4 * c}" y2="${Y + k * c}" stroke="${K.ink}" stroke-width="3"/>`;
+    if (s.k === 1 || s.k === 2) o += Badge(X + c / 2, Y + c - 28, s.k === 1 ? '1 2 3 4' : '1', s.k === 2 ? 'new' : 'plain', 66);
+    if (s.k === 2) o += T(560, 110, 'row: remove 2', { size: 15, weight: 700, anchor: 'start' }) + T(560, 145, 'column: remove 3', { size: 15, weight: 700, anchor: 'start' }) + T(560, 180, 'box: remove 4', { size: 15, weight: 700, anchor: 'start' }) + T(560, 225, 'left: {1}', { size: 15, weight: 800, anchor: 'start', color: K.ok });
+    return svg(o, 400); },
+  q: ['A cell’s domain has one value left. What is that, in heuristic terms?', ['Least constraining value', 'The extreme case of minimum remaining values', 'A cycle cutset'], 1, 'MRV picks the variable with the fewest values; one value means it is forced.'],
+  apply: 'Easy Sudokus fall to propagation alone; hard ones need propagation plus backtracking search.',
+  note: 'The 4×4 sequence was checked by running the propagation in this page’s code.' });
+
+'use strict';
+const L2 = [];
+/* ---- 5.3 backtracking (trace computed by traceBacktrack) ---- */
+const BT_ORDER = ['WA', 'NSW', 'NT', 'Q', 'SA', 'V', 'T'];
+const BT = traceBacktrack(BT_ORDER);
+function btCaption(st) {
+  const tried = (st.tried || []).map(([c, n]) => `${CNAME[c]} clashes with ${n}`).join('; ');
+  if (st.kind === 'assign') { const again = BT.steps.slice(0, BT.steps.indexOf(st)).some(p => p.kind === 'assign' && p.v === st.v); return (again ? `New branch: ${st.v} = ${CNAME[st.c]}` : `${st.v} = ${CNAME[st.c]}`) + (tried ? ` (${tried})` : '') + '.'; }
+  if (st.kind === 'dead') return (st.tried || []).length ? `${st.v} has no legal color — ${tried}. Dead end: undo the previous choice (backtrack ${st.n}).` : `${st.v} has no colors left to try. Backtrack ${st.n}: undo again.`;
+  return `All seven regions colored, after ${BT.backtracks} backtracks. Root cause: NSW = red matched WA, boxing SA in.`;
+}
+L2.push({ id: '5.3', sec: '5.3 Backtracking search', title: 'Backtracking search',
+  intro: 'Assign one variable at a time. When a variable has no legal value, undo the most recent choice and try its next value.',
+  steps: [{ c: 'Fixed order WA, NSW, NT, Q, SA, V, T; colors tried red, green, blue. No heuristics yet.', a: {} }].concat(BT.steps.map(st => ({ c: btCaption(st), a: st.a, st }))),
+  draw: s => { const st = s.st, ring = {}, hot = {};
+    if (st && st.kind === 'dead') { ring[st.v] = K.bad; st.tried.forEach(([c, n]) => hot[st.v + '-' + n] = K.bad); }
+    if (st && st.kind === 'assign') ring[st.v] = K.focus;
+    const g = auGraph({ dx: 0, dy: 10, colors: s.a, ring, hot });
+    let o = g.s + T(470, 50, 'assignment stack', { size: 13, color: K.muted, italic: true, anchor: 'start' });
+    BT_ORDER.filter(v => s.a[v]).forEach((v, k) => { o += Box(470, 64 + k * 40, 210, 32, { fill: K.card, stroke: st && st.v === v ? K.focus : K.line }) + `<circle cx="490" cy="${80 + k * 40}" r="8" fill="${COLOR[s.a[v]]}"/>` + T(508, 85 + k * 40, `${v} = ${CNAME[s.a[v]]}`, { size: 14, weight: 600, anchor: 'start' }); });
+    if (st && st.kind === 'dead') o += T(575, 395, '✗ ' + st.v + ' dead end', { size: 15, weight: 800, color: K.bad });
+    return svg(o); },
+  q: ['Why did SA hit a dead end twice?', ['SA has too few colors', 'An early choice (NSW = red) left SA with no legal color whatever the others did', 'Backtracking never revisits SA'], 1, 'Undoing the latest choices could not help until NSW itself changed.'],
+  apply: 'Any rostering tool that “tries, fails, and undoes” is doing backtracking.',
+  note: 'Count the backtracks with the class; the next lessons get this to zero.' });
+
+const AS = { WA: 'R', NT: 'G' };
+L2.push({ id: '5.3.1-MRV', sec: '5.3 Backtracking search', title: 'Minimum remaining values',
+  intro: 'MRV picks the variable with the fewest legal values left — fail first, at the top of the tree.',
+  steps: [
+    { c: 'WA is red and NT is green. Each badge shows the colors still legal.', k: 0 },
+    { c: 'SA has one value left, Q two, the rest three. MRV picks SA.', k: 1 },
+    { c: 'SA = blue. If SA had had no value, we would have learned it now, not ten levels deeper.', k: 2 }],
+  draw: s => { const a = s.k === 2 ? { ...AS, SA: 'B' } : AS, d = domsAfter(a), kind = {}; for (const v in d) if (!a[v]) kind[v] = d[v].length === 1 ? 'new' : 'plain';
+    return svg(auGraph({ dx: 150, dy: 10, colors: a, doms: Object.fromEntries(Object.entries(d).filter(([v]) => !a[v])), domKind: kind, ring: s.k === 1 ? { SA: K.focus } : {} }).s); },
+  q: ['Which variable does MRV choose when SA has 1 value and Q has 2?', ['Q', 'SA', 'T'], 1, 'Fewest remaining values first.'],
+  apply: 'Hiring: fill the role with the fewest qualified candidates first.',
+  note: 'Also called “most constrained variable” or “fail-first.”' });
+
+L2.push({ id: '5.3.1-degree', sec: '5.3 Backtracking search', title: 'Degree heuristic',
+  intro: 'At the start, every domain is full and MRV ties. The degree heuristic breaks the tie: choose the variable with the most constraints on unassigned variables.',
+  steps: [
+    { c: 'Each badge shows a degree: the number of edges to unassigned variables.', k: 0 },
+    { c: 'SA has degree 5 — the most. Start there.', k: 1 },
+    { c: 'With SA colored, the remaining mainland forms a ring around it, and the rest can be colored without backtracking.', k: 2 }],
+  draw: s => { const deg = Object.fromEntries(AU_V.map(v => [v, String(AU_N[v].length)])), hot = {}; if (s.k >= 1) AU_N.SA.forEach(n => hot['SA-' + n] = K.focus);
+    return svg(auGraph({ dx: 150, dy: 10, doms: deg, domKind: s.k === 1 ? { SA: 'new' } : {}, ring: s.k === 1 ? { SA: K.focus } : {}, hot: s.k === 1 ? hot : {}, colors: s.k === 2 ? SOL : {} }).s); },
+  q: ['What is SA’s degree?', ['3', '5', '7'], 1, 'SA borders WA, NT, Q, NSW and V.'],
+  apply: 'In a timetable, schedule the course that clashes with the most other courses first.',
+  note: 'Use degree as the tie-breaker after MRV.' });
+
+L2.push({ id: '5.3.1-LCV', sec: '5.3 Backtracking search', title: 'Least constraining value',
+  intro: 'Once a variable is chosen, LCV tries first the value that rules out the fewest choices for its neighbors.',
+  steps: [
+    { c: 'WA is red, NT is green, and we are coloring Q. Q may be red or blue.', k: 0, a: AS },
+    { c: 'Try Q = red: SA keeps blue, NSW loses only red. Every neighbor still has an option.', k: 1, a: { ...AS, Q: 'R' } },
+    { c: 'Try Q = blue: SA loses its last color. Its badge is empty.', k: 2, a: { ...AS, Q: 'B' } },
+    { c: 'LCV chooses red — it leaves the most room for the rest of the search.', k: 3, a: { ...AS, Q: 'R' } }],
+  draw: s => { const d = domsAfter(s.a), kind = {}, doms = {}; for (const v of ['SA', 'NSW']) { doms[v] = d[v]; kind[v] = s.k && d[v].length < (domsAfter(AS)[v].length) ? 'new' : 'plain'; }
+    if (s.k === 0) doms.Q = 'RB';
+    const hot = {}; if (s.k === 1 || s.k === 2) for (const n of ['SA', 'NSW']) hot['Q-' + n] = s.k === 2 && n === 'SA' ? K.bad : K.focus;
+    return svg(auGraph({ dx: 150, dy: 10, colors: s.a, doms, domKind: kind, hot, ring: s.k === 3 ? { Q: K.ok } : {} }).s); },
+  q: ['Why does LCV avoid Q = blue?', ['Blue is unpopular', 'It empties SA’s domain', 'It has more neighbors'], 1, 'A value that wipes out a neighbor’s last option forces a backtrack.'],
+  apply: 'Booking a meeting room: pick the room that blocks the fewest other meetings.',
+  note: 'MRV and degree choose variables (fail first); LCV chooses values (succeed first).' });
+
+/* MAC vs FC — verified: after WA=R, Q=G, MAC revises SA→NT and empties SA */
+const FCD = { NT: 'B', SA: 'B', NSW: 'RB', V: 'RGB', T: 'RGB' };
+L2.push({ id: '5.3.2', sec: '5.3 Backtracking search', title: 'Interleaving search and inference',
+  intro: 'After each assignment, run inference. Forward checking looks one edge away; MAC keeps propagating until nothing changes.',
+  steps: [
+    { c: 'WA is red; Q has just become green. Both methods remove green from Q’s neighbors: NT and SA are down to blue.', k: 0 },
+    { c: 'Forward checking stops — it only checks edges at Q. MAC sees NT changed, re-checks SA→NT, and SA’s blue has no support. SA is empty: backtrack now.', k: 1 },
+    { c: 'Forward checking finds the dead end one assignment later, after setting V = blue.', k: 2 }],
+  draw: s => { const a = { WA: 'R', Q: 'G' };
+    const left = auGraph({ dx: -25, dy: 25, sc: 0.92, colors: s.k === 2 ? { ...a, V: 'B' } : a, doms: s.k === 2 ? { ...FCD, SA: '∅', NSW: 'R' } : FCD, domKind: { NT: 'new', SA: 'new', NSW: 'new' }, hot: s.k === 2 ? { 'SA-V': K.bad } : {} });
+    const right = auGraph({ dx: 335, dy: 25, sc: 0.92, colors: a, doms: s.k >= 1 ? { ...FCD, SA: '∅' } : FCD, domKind: { NT: 'new', SA: 'new', NSW: 'new' }, hot: s.k >= 1 ? { 'NT-SA': K.bad } : {} });
+    return svg(T(180, 26, 'Forward checking', { size: 15, weight: 700 }) + T(540, 26, 'MAC', { size: 15, weight: 700 }) + `<line x1="360" y1="40" x2="360" y2="410" stroke="${K.line}" stroke-dasharray="4 5"/>` + left.s + right.s); },
+  q: ['When does MAC detect this dead end?', ['Immediately after Q = green', 'After V = blue', 'Never'], 0, 'Propagating through NT reaches SA right away.'],
+  apply: 'Modern CP solvers run MAC-style propagation after every decision.',
+  note: 'MAC = AC-3 started from the arcs into the variable just assigned.' });
+
+L2.push({ id: '5.3.3', sec: '5.3 Backtracking search', title: 'Intelligent backtracking: backjumping',
+  intro: 'When a variable fails, jump back to the most recent variable that actually caused the conflict.',
+  steps: [
+    { c: 'Order Q, NSW, V, T, SA. Q = red, NSW = green, V = blue.', a: { Q: 'R', NSW: 'G', V: 'B' } },
+    { c: 'T = red. Tasmania is colored, but it touches nothing.', a: { Q: 'R', NSW: 'G', V: 'B', T: 'R' } },
+    { c: 'SA: red, green and blue are all taken by its neighbors. Dead end.', a: { Q: 'R', NSW: 'G', V: 'B', T: 'R' }, fail: true },
+    { c: 'SA’s conflict set is {Q, NSW, V} — the colored neighbors that took its values. T has no edge to SA, so changing T cannot help.', a: { Q: 'R', NSW: 'G', V: 'B', T: 'R' }, fail: true, cs: true },
+    { c: 'Chronological backtracking would retry T. Backjumping goes straight to V, the most recent variable in the conflict set.', a: { Q: 'R', NSW: 'G', V: 'B', T: 'R' }, fail: true, cs: true, jump: true }],
+  draw: s => { const hot = {}; if (s.cs) ['Q', 'NSW', 'V'].forEach(n => hot['SA-' + n] = K.bad);
+    const g = auGraph({ dx: 150, dy: 10, colors: s.a, ring: s.fail ? { SA: K.bad } : {}, hot, doms: s.fail ? { SA: '∅' } : {}, dim: s.cs ? ['T'] : [] });
+    let o = g.s; if (s.jump) o += E(g.P.SA, g.P.V, { color: K.focus, w: 4, arrow: true, off: 22, label: 'jump to V' });
+    if (s.cs) o += T(g.P.T[0] + 30, g.P.T[1] - 34, 'no edge to SA', { size: 13, italic: true, color: K.muted, weight: 600 });
+    return svg(o); },
+  q: ['Why can backjumping skip T?', ['T was assigned last', 'T is not in SA’s conflict set', 'T has the most values'], 1, 'Only variables that constrain SA can change its outcome.'],
+  apply: 'Debugging: when a build fails, revert the commit that touched the failing module, not simply the latest one.',
+  note: 'Forward checking already finds this conflict set as a by-product.' });
+
+const NG = { A: [130, 80], B: [130, 170], C: [130, 260], E: [130, 350] };
+L2.push({ id: '5.3.4', sec: '5.3 Backtracking search', title: 'Constraint learning',
+  intro: 'When search fails, record the small set of assignments responsible — a no-good — so it is never tried again.',
+  steps: [
+    { c: 'E may be 1 or 2 and must differ from A and B; C is unrelated. Search sets A = 1, B = 2, C = 1 — and E has nothing left.', k: 0 },
+    { c: 'Only A = 1 and B = 2 emptied E. Record the no-good: never A = 1 together with B = 2.', k: 1 },
+    { c: 'Later — after a restart, or along another path — the same pair appears. The branch is cut at once; C and E are never tried.', k: 2 }],
+  draw: s => { let o = '';
+    const path = (dx, labs, cut, dy = 0) => { let p = ''; labs.forEach((l, k) => { const P = [NG[Object.keys(NG)[k]][0] + dx, NG[Object.keys(NG)[k]][1] + dy]; if (k) p += E([P[0], P[1] - 90], P, { r1: 24, r2: 24 }); p += N(P[0], P[1], l, { r: 24, fs: 12, fill: k === labs.length - 1 && !cut ? K.bad : cut && k === labs.length - 1 ? K.bad : K.card }); }); return p; };
+    o += path(0, ['A=1', 'B=2', 'C=1', 'E']) + Badge(205, 340, 'E ∅', 'empty', 54);
+    if (s.k >= 1) o += Box(330, 60, 360, 56, { fill: K.ink, stroke: K.ink, rx: 10 }) + T(510, 95, 'learned:  not (A = 1 and B = 2)', { size: 16, weight: 700, color: '#fff' });
+    if (s.k >= 1) { o += E([130, 80], [330, 88], { color: K.focus, w: 2, dash: true, r1: 26, r2: 2 }) + E([130, 170], [330, 100], { color: K.focus, w: 2, dash: true, r1: 26, r2: 2 }); }
+    if (s.k === 2) { o += path(380, ['A=1', 'B=2'], true, 120) + E([510, 314], [510, 372], { dash: true, r1: 0, r2: 0 }) + T(510, 395, 'cut — C and E never tried', { size: 13, italic: true, weight: 700, color: K.bad }) + T(570, 205, 'later', { size: 13, italic: true, color: K.muted, anchor: 'start' }); }
+    return svg(o); },
+  q: ['Why is C not part of the no-good?', ['C was assigned last', 'C played no part in emptying E', 'C has only one value'], 1, 'A no-good should be as small as possible to prune as much as possible.'],
+  apply: 'SAT solvers learn millions of such clauses; it is why they handle industrial-size problems.',
+  note: 'Backjumping decides where to go back to; learning decides what never to try again.' });
+
+/* ---- 5.4 local search ---- */
+function mcMap(start) { const a = { ...start }, steps = [{ a: { ...a } }]; const conf = (v, c) => AU_N[v].filter(n => a[n] === c).length;
+  for (let k = 0; k < 10; k++) { const bad = AU_V.filter(v => conf(v, a[v]) > 0); if (!bad.length) break; let moved = false;
+    for (const v of bad) { const counts = Object.fromEntries('RGB'.split('').map(c => [c, conf(v, c)])), best = Math.min(...Object.values(counts)); if (best < counts[a[v]]) { const c = 'RGB'.split('').find(c => counts[c] === best), from = a[v]; a[v] = c; steps.push({ a: { ...a }, v, counts, from, moved: c }); moved = true; break; } }
+    if (!moved) break; }
+  return steps; }
+const MC0 = { WA: 'R', NT: 'R', SA: 'G', Q: 'G', NSW: 'R', V: 'R', T: 'R' };
+const MCS = mcMap(MC0);
+const nConf = a => AU_E.filter(([x, y]) => a[x] === a[y]).length;
+L2.push({ id: '5.4', sec: '5.4 Local search', title: 'Local search for CSPs',
+  intro: 'Start from a complete assignment that breaks some constraints, then repair it one variable at a time.',
+  steps: MCS.map((st, i) => ({ st, c: i === 0 ? `Every region has a color, but ${nConf(st.a)} edges join equal colors.`
+    : i === 1 ? `${st.v} is in a conflict. The box counts the conflicts each color would cause — red ${st.counts.R}, green ${st.counts.G}, blue ${st.counts.B} — so ${st.v} switches to ${CNAME[st.moved]}. ${nConf(st.a)} conflicts left.`
+    : `${st.v}: ${CNAME[st.from]} → ${CNAME[st.moved]}. ` + (nConf(st.a) ? `${nConf(st.a)} conflict left.` : 'No conflicts: a solution, reached without any search tree.') })),
+  draw: s => { const st = s.st, hot = {}; AU_E.forEach(([x, y]) => { if (st.a[x] === st.a[y]) hot[x + '-' + y] = K.bad; });
+    const g = auGraph({ dx: 150, dy: 10, colors: st.a, hot, ring: st.v ? { [st.v]: K.focus } : {} }); let o = g.s;
+    if (st.counts) { const [px, py] = g.P[st.v]; o += Box(px - 62, py - 80, 124, 44, { fill: K.card, stroke: K.focus }); ['R', 'G', 'B'].forEach((c, k) => { o += `<circle cx="${px - 38 + k * 38}" cy="${py - 66}" r="7" fill="${COLOR[c]}"/>` + T(px - 38 + k * 38, py - 42, st.counts[c], { size: 13, weight: 800 }); }); }
+    return svg(o); },
+  q: ['What does local search start from?', ['An empty assignment', 'A complete but possibly inconsistent assignment', 'A solution'], 1, 'It repairs, rather than builds.'],
+  apply: 'Re-planning an airline schedule after a storm: repair the existing schedule rather than rebuild it.',
+  note: 'Red edges are violated constraints; the box shows the conflict count for each color.' });
+
+const Q8 = [4, 0, 0, 3, 7, 5, 3, 0], MQ = traceMinConflicts(Q8, 12);
+L2.push({ id: '5.4-minconflicts', sec: '5.4 Local search', title: 'Min-conflicts on 8-queens',
+  intro: 'Pick a queen that is under attack and move it, within its column, to the row with the fewest conflicts.',
+  steps: [{ st: MQ.steps[0], c: `Eight queens, one per column, with ${qTotal(MQ.steps[0].rows)} attacking pairs. Red queens are under attack.` }].concat(MQ.steps.filter(s => s.moved != null).map((mv, k) => {
+    const before = MQ.steps[MQ.steps.indexOf(mv) - 1], st = { rows: mv.rows, col: mv.col, counts: before.counts, from: before.rows[mv.col] };
+    return { st, c: k === 0 ? `Column ${mv.col + 1}’s queen is attacked. The numbers count how many queens would attack it in each row; it moves to the lowest, row ${mv.moved + 1}. Attacking pairs: ${qTotal(mv.rows)}.` : `Column ${mv.col + 1}: row ${before.rows[mv.col] + 1} → row ${mv.moved + 1}. ` + (qTotal(mv.rows) ? `Attacking pairs: ${qTotal(mv.rows)}.` : 'No attacks left: solved.') }; })),
+  draw: s => { const st = s.st, X = 160, Y = 20, c = 47; let o = '';
+    for (let r = 0; r < 8; r++) for (let cc = 0; cc < 8; cc++) o += `<rect x="${X + cc * c}" y="${Y + r * c}" width="${c}" height="${c}" fill="${(r + cc) % 2 ? 'var(--soft)' : 'var(--card)'}" stroke="${K.line}" stroke-width="0.6"/>`;
+    if (st.col != null) o += `<rect x="${X + st.col * c}" y="${Y}" width="${c}" height="${8 * c}" fill="none" stroke="${K.focus}" stroke-width="3.5"/>`;
+    st.rows.forEach((r, cc) => { const attacked = qConf(st.rows, cc, r) > 0; o += T(X + cc * c + c / 2, Y + r * c + c / 2 + 12, '♛', { size: 32, color: attacked ? K.bad : K.ink, weight: 400 }); });
+    if (st.counts) st.counts.forEach((n, r) => { if (r === st.rows[st.col]) return; o += T(X + st.col * c + c / 2, Y + r * c + c / 2 + 7, n, { size: 18, weight: 800, color: K.muted }); });
+    if (st.from != null) o += T(X + st.col * c + c / 2, Y + st.from * c + c / 2 + 12, '♛', { size: 32, color: K.line, weight: 400 }).replace('<text', '<text opacity="0"') + `<circle cx="${X + st.col * c + c / 2}" cy="${Y + st.from * c + c / 2}" r="15" fill="none" stroke="${K.muted}" stroke-width="2" stroke-dasharray="4 4"/>`;
+    o += T(610, 60, 'attacking pairs', { size: 13, color: K.muted, anchor: 'start', italic: true }) + T(610, 105, qTotal(st.rows), { size: 40, weight: 800, anchor: 'start', color: qTotal(st.rows) ? K.bad : K.ok });
+    return svg(o, 410); },
+  q: ['Which row does min-conflicts choose?', ['A random row', 'The row with the fewest attacks', 'The top row'], 1, 'Ties are broken at random in practice; this demo takes the lowest-numbered row.'],
+  apply: 'Min-conflicts schedules telescope observations and repairs timetables after small changes.',
+  note: 'Run from this start, the page’s own solver needs four moves. Even a million queens typically take about 50 steps.' });
+
+/* ---- 5.5 structure ---- */
+L2.push({ id: '5.5', sec: '5.5 Problem structure', title: 'Independent subproblems',
+  intro: 'If the constraint graph splits into separate components, solve each one on its own.',
+  steps: [
+    { c: 'Tasmania shares no edge with the mainland: two independent subproblems.', k: 0 },
+    { c: 'Solved together: up to 3⁷ = 2187 combinations. Solved apart: 3⁶ + 3¹ = 732.', k: 1 },
+    { c: 'The gain grows fast: 80 variables in four groups of 20 is 4 × 2²⁰ instead of 2⁸⁰ for Boolean domains.', k: 2 }],
+  draw: s => { const g = auGraph({ dx: 150, dy: 10, ring: { T: K.focus } }); let o = g.s + `<ellipse cx="${g.P.T[0]}" cy="${g.P.T[1]}" rx="52" ry="42" fill="none" stroke="${K.focus}" stroke-width="2" stroke-dasharray="6 5"/>` + `<ellipse cx="350" cy="215" rx="230" ry="165" fill="none" stroke="${K.ink}" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+    if (s.k >= 1) o += Box(30, 20, 220, 70, { fill: K.card }) + T(140, 48, 'together  2187', { size: 15, weight: 700 }) + T(140, 74, 'apart  729 + 3 = 732', { size: 15, weight: 700, color: K.ok });
+    return svg(o); },
+  q: ['Why does splitting help so much?', ['Fewer constraints', 'Costs add instead of multiplying', 'Domains get smaller'], 1, 'Independent parts combine by addition, not multiplication.'],
+  apply: 'Schedule each hospital department separately when they share no staff or rooms.',
+  note: 'Finding components is linear-time graph search.' });
+
+const TP = { A: [360, 70], B: [230, 190], C: [490, 190], D: [150, 320], E: [310, 320] }, TEDGE = [['A', 'B'], ['A', 'C'], ['B', 'D'], ['B', 'E']];
+const TD0 = { A: '1,2,3', B: '1,2', C: '2', D: '1', E: '2,3' };
+L2.push({ id: '5.5-tree', sec: '5.5 Problem structure', title: 'Tree-structured CSPs',
+  intro: 'If the constraint graph is a tree, two passes solve it with no backtracking: arc consistency from the leaves up, then assignment from the root down.',
+  steps: [
+    { c: 'Root A; every edge means parent ≠ child. Domains are on the badges.', d: TD0 },
+    { c: 'Backward pass, B→E: each value of B has a different value in E. No change.', d: TD0, arc: ['B', 'E', 'ok'] },
+    { c: 'B→D: D can only be 1, so B = 1 has no support. B becomes {2}.', d: { ...TD0, B: '2' }, arc: ['B', 'D', 'bad'], ch: 'B' },
+    { c: 'A→C: C can only be 2, so A = 2 has no support. A becomes {1, 3}.', d: { ...TD0, B: '2', A: '1,3' }, arc: ['A', 'C', 'bad'], ch: 'A' },
+    { c: 'A→B: B is 2; A’s values 1 and 3 both differ. No change. Backward pass done.', d: { ...TD0, B: '2', A: '1,3' }, arc: ['A', 'B', 'ok'] },
+    { c: 'Forward pass: A = 1, B = 2, C = 2, D = 1, E = 3 — each the first value consistent with its parent. No backtracking.', d: { ...TD0, B: '2', A: '1,3' }, sol: { A: 1, B: 2, C: 2, D: 1, E: 3 } }],
+  draw: s => { let o = ''; for (const [a, b] of TEDGE) o += E(TP[a], TP[b]);
+    if (s.arc) o += E(TP[s.arc[0]], TP[s.arc[1]], { color: s.arc[2] === 'ok' ? K.ok : K.bad, w: 4, arrow: true, off: -14, r1: 26, r2: 26 });
+    for (const v in TP) { o += N(TP[v][0], TP[v][1], s.sol ? `${v}=${s.sol[v]}` : v, { r: 26, fs: s.sol ? 13 : 16, fill: s.sol ? K.ink : K.card }); o += Badge(TP[v][0], TP[v][1] + 34, '{' + s.d[v] + '}', s.ch === v ? 'new' : 'plain'); }
+    return svg(o, 390); },
+  q: ['Why is the forward pass backtrack-free?', ['Domains are small', 'Every remaining parent value has support in each child', 'The order is random'], 1, 'The backward pass removed exactly the values that would fail.'],
+  apply: 'Hierarchies — org charts, file trees, supply trees — are often tree-structured CSPs.',
+  note: 'Cost: O(n·d²), linear in the number of variables.' });
+
+const CUT = [
+  { c: 'The map is not a tree, but removing SA leaves one. {SA} is a cycle cutset.', ring: { SA: K.focus } },
+  { c: 'Without SA: WA–NT–Q–NSW–V is a chain, and T stands alone. A chain is a tree.', faded: ['SA'] },
+  { c: 'Condition on the cutset: SA = red. Every neighbor of SA loses red.', a: { SA: 'R' }, doms: { WA: 'GB', NT: 'GB', Q: 'GB', NSW: 'GB', V: 'GB', T: 'RGB' } },
+  { c: 'Solve the tree with the two-pass algorithm. If SA = red had failed, try green, then blue: at most 3 tree solves.', a: { SA: 'R', WA: 'G', NT: 'B', Q: 'G', NSW: 'B', V: 'G', T: 'R' } }];
+L2.push({ id: '5.5.1', sec: '5.5 Problem structure', title: 'Cycle cutset conditioning',
+  intro: 'Assign a few variables whose removal leaves a tree; solve the tree for each assignment of them.',
+  steps: CUT, draw: s => svg(auGraph({ dx: 150, dy: 10, ring: s.ring, faded: s.faded, colors: s.a || {}, doms: s.doms, domKind: s.doms ? Object.fromEntries(Object.keys(s.doms).filter(v => v !== 'T').map(v => [v, 'new'])) : {} }).s),
+  q: ['With a cutset of size c and domain size d, how many tree solves at most?', ['c·d', 'd^c', 'c^d'], 1, 'One tree solve per assignment of the cutset: d^c.'],
+  apply: 'Network design: fix a few hub settings, and the rest of the network becomes tree-like.',
+  note: 'Finding the smallest cutset is itself NP-hard, but good approximations exist.' });
+
+const BAGS = [['WA', 'NT', 'SA'], ['NT', 'SA', 'Q'], ['SA', 'Q', 'NSW'], ['SA', 'NSW', 'V'], ['T']];
+L2.push({ id: '5.5.2', sec: '5.5 Problem structure', title: 'Tree decomposition',
+  intro: 'Group variables into overlapping bags that form a tree. Solve each bag, then stitch the bags together like a tree CSP.',
+  steps: [
+    { c: 'Five bags. Every constraint of the map lies inside at least one bag.', k: 0 },
+    { c: 'Running intersection: SA appears in four bags, and they form a connected chain. The same holds for every variable.', k: 1 },
+    { c: 'Each bag is a small CSP — a triangle has 6 colorings. Neighboring bags must agree on their shared variables.', k: 2 },
+    { c: 'Agreeing choices give a full solution. The largest bag has 3 variables, so the tree width is 2.', k: 3 }],
+  draw: s => { let o = ''; const xs = [80, 220, 360, 500, 640];
+    BAGS.forEach((b, i) => { const hl = s.k === 1 && b.includes('SA'); o += Box(xs[i] - 62, 110, 124, 170, { fill: hl ? K.focusSoft : K.card, stroke: hl ? K.focus : K.ink, rx: 30 });
+      b.forEach((v, k) => { const y = 145 + k * 50; o += N(xs[i], y, v, { r: 20, fs: v.length > 2 ? 11 : 13, fill: s.k === 3 ? COLOR[SOL[v]] : K.card }); });
+      if (i < 3) o += E([xs[i] + 62, 195], [xs[i + 1] - 62, 195], { r1: 0, r2: 0, w: 3, color: K.ink }); });
+    if (s.k === 2) o += T(360, 330, 'shared variables must take the same value in both bags', { size: 14, italic: true, color: K.muted });
+    if (s.k === 3) o += T(360, 330, 'width = largest bag − 1 = 2', { size: 15, weight: 700 });
+    return svg(o, 370); },
+  q: ['What is the width of a tree decomposition?', ['Number of bags', 'Size of the largest bag minus one', 'Number of edges'], 1, 'Solving costs O(n·d^(w+1)).'],
+  apply: 'Probabilistic inference in Bayesian networks uses the same decomposition idea.',
+  note: 'T forms its own bag: it shares nothing.' });
+
+const PERMS = ['RGB', 'RBG', 'GRB', 'GBR', 'BRG', 'BGR'];
+L2.push({ id: '5.5.3', sec: '5.5 Problem structure', title: 'Value symmetry',
+  intro: 'If renaming values never changes whether an assignment is a solution, solutions come in symmetric families.',
+  steps: [
+    { c: 'One solution to the map.', k: 0 },
+    { c: 'Swap the color names any way you like: 3! = 6 solutions that are really the same.', k: 1 },
+    { c: 'Symmetry breaking: require NT < SA < WA in the order red < green < blue. Exactly one member of the family survives.', k: 2 }],
+  draw: s => { let o = '';
+    const map = (ox, oy, sc, perm, keep) => { const rn = { R: perm[0], G: perm[1], B: perm[2] }, col = Object.fromEntries(Object.entries(SOL).map(([v, c]) => [v, rn[c]]));
+      return `<g transform="translate(${ox},${oy}) scale(${sc})" opacity="${keep === false ? 0.25 : 1}">` + auMap(0, 0, col) + '</g>'; };
+    if (s.k === 0) return svg(map(200, 40, 1.05, 'RGB'));
+    const ord = c => 'RGB'.indexOf(c);
+    PERMS.forEach((p, i) => { const rn = { R: p[0], G: p[1], B: p[2] }, keep = s.k === 2 ? ord(rn[SOL.NT]) < ord(rn[SOL.SA]) && ord(rn[SOL.SA]) < ord(rn[SOL.WA]) : true;
+      o += map(20 + (i % 3) * 235, 10 + Math.floor(i / 3) * 205, 0.62, p, keep) + (s.k === 2 && keep ? `<rect x="${14 + (i % 3) * 235}" y="${6 + Math.floor(i / 3) * 205}" width="200" height="200" rx="12" fill="none" stroke="${K.ok}" stroke-width="3"/>` : ''); });
+    return svg(o); },
+  q: ['How many symmetric copies does a 3-color solution have?', ['3', '6', '9'], 1, 'Every permutation of the three color names: 3! = 6.'],
+  apply: 'Assigning identical delivery vans: van 1 versus van 2 is a distinction without a difference — break the symmetry.',
+  note: 'Symmetry breaking can shrink the search space by the size of the symmetry group.' });
+
+L2.push({ id: 'review', sec: 'Review', title: 'Choosing the right tool',
+  intro: 'A CSP solver combines choices about variables, values, inference and structure.',
+  steps: [
+    { c: 'First look at the constraint graph. Separate components? Solve them apart.', k: 0 },
+    { c: 'A tree? Two passes, no backtracking. A small cycle cutset? Condition on it, then solve trees.', k: 1 },
+    { c: 'Otherwise, backtracking with MRV and degree to choose variables, LCV to choose values, and MAC after every assignment.', k: 2 },
+    { c: 'Very large problem, or repairing an existing plan? Min-conflicts local search.', k: 3 }],
+  draw: s => { const B = (x, y, w, t, on, kind) => Box(x, y, w, 52, { fill: on ? (kind === 'q' ? K.focusSoft : K.okSoft) : K.card, stroke: on ? (kind === 'q' ? K.focus : K.ok) : K.line, rx: kind === 'q' ? 26 : 8 }) + T(x + w / 2, y + 32, t, { size: 14, weight: 700 });
+    let o = B(40, 40, 230, 'Separate components?', s.k >= 0, 'q') + B(330, 40, 330, 'Solve each component alone', s.k >= 0, 'a');
+    o += B(40, 130, 230, 'Tree or small cutset?', s.k >= 1, 'q') + B(330, 130, 330, 'Tree algorithm / cutset conditioning', s.k >= 1, 'a');
+    o += B(40, 220, 230, 'General problem?', s.k >= 2, 'q') + B(330, 220, 330, 'Backtracking + MRV/degree + LCV + MAC', s.k >= 2, 'a');
+    o += B(40, 310, 230, 'Huge, or repairing a plan?', s.k >= 3, 'q') + B(330, 310, 330, 'Min-conflicts local search', s.k >= 3, 'a');
+    for (const y of [66, 156, 246, 336]) o += E([270, y], [330, y], { r1: 2, r2: 2, arrow: true, color: K.ink });
+    return svg(o, 390); },
+  q: ['A scheduling problem has 10,000 variables and an existing plan that broke after one change. Best first tool?', ['Plain backtracking', 'Min-conflicts repair', 'Tree decomposition'], 1, 'Local search repairs the existing assignment quickly.'],
+  apply: 'Write down, for a problem from your own work, its variables, domains and constraints — then pick a tool from this chart.',
+  note: 'Good closing activity: students defend a tool choice for a scenario.' });
+
+(function () {
+  const LS = L1.concat(L2); let li = 0, si = 0, timer = null; const seen = new Set();
+  const $ = id => document.getElementById(id);
+  const capText = st => typeof st.c === 'function' ? st.c() : st.c;
+  // navigation
+  let html = '', sec = '';
+  LS.forEach((L, i) => { if (L.sec !== sec) { if (sec) html += '</ol>'; sec = L.sec; html += `<h3>${esc(sec)}</h3><ol>`; } html += `<li><a href="#${L.id}" data-i="${i}"><span class="num">${esc(L.id.replace(/-.*/, ''))}</span><span>${esc(L.title)}</span></a></li>`; });
+  $('navlist').innerHTML = html + '</ol>';
+  $('navsel').innerHTML = LS.map((L, i) => `<option value="${i}">${esc(L.id.replace(/-.*/, ''))}  ${esc(L.title)}</option>`).join('');
+  $('navsel').addEventListener('change', e => go(+e.target.value, 0));
+  function setQuiz(L) {
+    const [q, opts, ans, why] = L.q; $('q').textContent = q; $('why').textContent = '';
+    $('opts').innerHTML = opts.map((o, k) => `<button data-k="${k}">${esc(o)}</button>`).join('');
+    $('opts').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const k = +b.dataset.k; $('opts').querySelectorAll('button').forEach(x => x.classList.remove('right', 'wrong'));
+      b.classList.add(k === ans ? 'right' : 'wrong'); $('why').textContent = (k === ans ? 'Correct. ' : 'Not quite. ') + why; }));
+  }
+  function render(newLesson) {
+    const L = LS[li], st = L.steps[si];
+    if (newLesson) { $('sectnum').textContent = L.id.replace(/-.*/, ''); $('title').textContent = L.title; $('intro').textContent = L.intro; $('apply').textContent = L.apply; $('note').textContent = L.note; setQuiz(L);
+      document.title = L.title + ' — CS650 Chapter 5'; seen.clear();
+      document.querySelectorAll('nav a').forEach(a => a.setAttribute('aria-current', +a.dataset.i === li ? 'true' : 'false')); $('navsel').value = li;
+      const cur = document.querySelector('nav a[aria-current="true"]'); if (cur && cur.scrollIntoView && window.innerWidth > 860) cur.scrollIntoView({ block: 'nearest' }); }
+    seen.add(si);
+    $('fig').innerHTML = L.draw(st, si);
+    $('cap').textContent = capText(st); $('count').textContent = `${si + 1} of ${L.steps.length}`;
+    $('dots').innerHTML = L.steps.map((_, k) => `<button aria-label="Step ${k + 1}" aria-current="${k === si}" class="${k !== si && seen.has(k) ? 'seen' : ''}" data-k="${k}"></button>`).join('');
+    $('dots').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { stop(); si = +b.dataset.k; render(false); }));
+    $('prev').disabled = li === 0 && si === 0; $('next').disabled = li === LS.length - 1 && si === L.steps.length - 1;
+    $('next').textContent = si === L.steps.length - 1 && li < LS.length - 1 ? 'Next lesson' : 'Next step';
+    if (location.hash.slice(1) !== L.id) history.replaceState(null, '', '#' + L.id);
+  }
+  function go(l, s) { const nl = l !== li; li = l; si = s; render(nl); if (nl) window.scrollTo({ top: 0 }); }
+  function next() { const L = LS[li]; if (si < L.steps.length - 1) { si++; render(false); } else if (li < LS.length - 1) go(li + 1, 0); else stop(); }
+  function prev() { if (si > 0) { si--; render(false); } else if (li > 0) go(li - 1, LS[li - 1].steps.length - 1); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; $('play').textContent = 'Play'; $('play').setAttribute('aria-pressed', 'false'); } }
+  $('next').addEventListener('click', () => { stop(); next(); }); $('prev').addEventListener('click', () => { stop(); prev(); });
+  $('play').addEventListener('click', () => { if (timer) return stop(); timer = setInterval(next, 4200); $('play').textContent = 'Pause'; $('play').setAttribute('aria-pressed', 'true'); });
+  document.querySelectorAll('nav a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); stop(); go(+a.dataset.i, 0); }));
+  $('notesBtn').addEventListener('click', () => { const on = $('notesBtn').getAttribute('aria-pressed') !== 'true'; $('notesBtn').setAttribute('aria-pressed', on); $('note').hidden = !on; try { localStorage.setItem('cs650-notes', on ? '1' : '0'); } catch (e) {} });
+  try { if (localStorage.getItem('cs650-notes') === '1') { $('notesBtn').setAttribute('aria-pressed', 'true'); $('note').hidden = false; } } catch (e) {}
+  document.addEventListener('keydown', e => { if (e.target.closest('select,input,textarea') || e.altKey || e.metaKey || e.ctrlKey) return; if (e.key === 'ArrowRight') { stop(); next(); } if (e.key === 'ArrowLeft') { stop(); prev(); } });
+  function fromHash() { const h = decodeURIComponent(location.hash.slice(1)); const i = LS.findIndex(L => L.id === h); return i < 0 ? 0 : i; }
+  window.addEventListener('hashchange', () => { const i = fromHash(); if (i !== li) go(i, 0); });
+  li = fromHash(); render(true);
+})();
+</script>
+</body>
+</html>
