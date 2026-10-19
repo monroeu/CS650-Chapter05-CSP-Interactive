@@ -70,3 +70,32 @@ The examples are original, simplified demonstrations. They are intended to expla
 ## Accessibility
 
 Semantic controls, visible focus indicators, text descriptions for every visual step, reduced-motion preference support, instructor-controlled progression, responsive layout. No student accounts or data tracking.
+
+## Cross-section navigation (Version 2 update)
+
+- **Previous step** moves backward within a lesson. At step 1, it automatically opens the **last step of the preceding subsection**.
+- **Next step** moves forward; from the final step it opens the next subsection.
+- **Previous subsection** and **Next subsection** skip directly between lessons.
+- **Section overview** returns to the first lesson of the current numbered textbook section.
+- The left navigation panel allows direct access to any subsection.
+- Browser Back and Forward buttons can use the subsection URL fragment; individual step positions are controlled on the page.
+- Keyboard Left/Right arrows also navigate steps when the focus is not in another interactive control.
+
+
+## Version 3 — Illustrated Masterclass Upgrade
+
+- Includes **29 lessons**, now with structured beginner introduction, walkthrough, reflection, and transfer stages (**about 236 step screens**).
+- New `assets/visuals.js` provides separate scalable inline SVG visuals: map regions, queue-style AC-3 arcs, branching backtracking tree, eight-queen chessboard, Sudoku grid, resource capacity bars, and highlighted graph links.
+- A domain-difference panel explicitly identifies removed/restored values between steps.
+- Observe → Explain why → Predict cards reinforce reasoning instead of memorization.
+- Previous step crosses backward into the prior subsection at its last step. Previous subsection, Section overview, Next subsection, and Next step are also provided.
+- All assets are local. No image downloads, CDN, API keys, Supabase, or paid services are necessary.
+- Illustrations are teaching diagrams; some are schematic rather than complete algorithm solvers. The Sudoku figure is a demonstration board, not the book's reproduced figure.
+
+### Release procedure
+
+Upload the contents of this extracted folder (including `assets/`) into the root of `monroeu/CS650-Chapter05-CSP-Interactive`, replacing existing files. GitHub Settings → Pages → Deploy from branch `main`, folder `/ (root)`.
+
+### Classroom guide
+
+Use the diagram to introduce the problem, advance through each algorithm stage, and require students to explain domain removals. For AC-3, pause at every arc; for backtracking, ask which choice is undone; for min-conflicts, ask students to count attacking pairs. End every subsection with the quiz and transfer challenge. For a fully executable generalized solver, supplement this static explanatory site with Python programming labs.
